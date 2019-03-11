@@ -10,7 +10,7 @@ utente(1, carlos, 20, braga).
 :- dynamic servico/4.
 servico(1, exame1, hospitaldeBraga, braga).
 servico(2, exame2, hospitaldeBraga, braga).
-servico(3, exame3, hospitaldoPorto, porto).
+servico(3, exame3, motijeiro, porto).
 servico(4, exame4, hospitaldoPorto, porto).
 
 % consulta(Data, IdUt, IdServico, Custo)
@@ -35,6 +35,7 @@ registarServico(IdServico, Descricao, Instituicao, Cidade) :- removerServico(IdS
                                                               assert(servico(IdServico, Descricao, Instituicao, Cidade)).
 registarServico(IdServico, Descricao, Instituicao, Cidade) :- assert(servico(IdServico, Descricao, Instituicao, Cidade)).
 
+% verifica se existe o utente e o serviço
 registarConsulta(Data, IdUt, IdServico, Custo) :- removerConsulta(IdUt, IdServico), naturais(IdUt), utente(IdUt,_,_,_), servico(IdServico,_,_,_), 
                                                   assert(consulta(Data, IdUt, IdServico, Custo)).
 registarConsulta(Data, IdUt, IdServico, Custo) :- naturais(IdUt), naturais(IdServico), utente(IdUt,_,_,_), servico(IdServico,_,_,_),  
@@ -53,13 +54,24 @@ removerConsulta(IdUt, IdServico) :-
 
 % Identificar as instituições prestadoras de serviços;
 instituicoesComServicos(Z) :-
-    findall(X, servico(_, _, X, _), Z). % tirar repetidos
+    setof(X, A^B^C^servico(A, B, X, C), Z). % tirar repetidos
 
 
 % Identificar utentes/serviços/consultas por critérios de seleção
 
 
 % Identificar serviços prestados por instituição/cidade/datas/custo
+
+apagaAndJoin((Id,I),[],[],([Id],I)).
+apagaAndJoin((Id,I),[(X,I)|T],R,([X|J],Y)) :- apagaAndJoin((Id,I),T,R,(J,Y)).
+apagaAndJoin((Id,I),[(X,Y)|T],[(X,Y)|R],J) :- I\=Y,apagaAndJoin((Id,I),T,R,J).
+
+joinAll([],[]).
+joinAll([H|T],[J|Res]) :- apagaAndJoin(H,T,R,J), joinAll(R,Res).  
+
+servicosInstituicao(R) :-
+    findall((Id,Instituicao), servico(Id, _, Instituicao, _), Z),joinAll(Z,R). 
+
 servicosInstituicao(Instituicao, Z) :-
     findall(Id, servico(Id, _, Instituicao, _), Z). 
 
