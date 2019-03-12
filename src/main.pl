@@ -1,6 +1,6 @@
 % Primeiro exercicio
 % Grupo 1
-
+:- op( 900,xfy,'::' ).
 
 % utente(IdUt, Nome, Idade, Cidade)
 :- dynamic utente/4.
@@ -18,28 +18,14 @@ servico(4, exame4, hospitaldoPorto, porto).
 % date(9,maio,1998)
 consulta(20/10/1998, 1, 1, 10.0).
 
-
-naturais(X) :-X =:= round(X), X >= 1.
-% inteiro(X) :- X =:= round(X).
-
-% checkString(S,R) :- atom_codes(S,R).
-
 % Registar utentes, serviços e consultas
 % Caso id seja igual, remove a ocorrência anterior
 % Apenas permite o registo de ids e idade em número natural
-registarUtente(IdUt, Nome, Idade, Cidade) :- removerUtente(IdUt), naturais(IdUt), 
-                                             naturais(Idade),assert(utente(IdUt, Nome, Idade, Cidade)).
-registarUtente(IdUt, Nome, Idade, Cidade) :- naturais(IdUt), naturais(Idade), assert(utente(IdUt, Nome, Idade, Cidade)).
+registarUtente(IdUt, Nome, Idade, Cidade) :- naturais(IdUt), naturais(Idade), evolucao(utente(IdUt, Nome, Idade, Cidade)).
 
-registarServico(IdServico, Descricao, Instituicao, Cidade) :- removerServico(IdServico), 
-                                                              assert(servico(IdServico, Descricao, Instituicao, Cidade)).
-registarServico(IdServico, Descricao, Instituicao, Cidade) :- assert(servico(IdServico, Descricao, Instituicao, Cidade)).
-
-% verifica se existe o utente e o serviço
-registarConsulta(Data, IdUt, IdServico, Custo) :- removerConsulta(IdUt, IdServico), naturais(IdUt), utente(IdUt,_,_,_), servico(IdServico,_,_,_), 
-                                                  assert(consulta(Data, IdUt, IdServico, Custo)).
-registarConsulta(Data, IdUt, IdServico, Custo) :- naturais(IdUt), naturais(IdServico), utente(IdUt,_,_,_), servico(IdServico,_,_,_),  
-                                                  assert(consulta(Data, IdUt, IdServico, Custo)).
+registarServico(IdServico, Descricao, Instituicao, Cidade) :- naturais(IdServico), evolucao(servico(IdServico, Descricao, Instituicao, Cidade)). 
+                                
+registarConsulta(Data, IdUt, IdServico, Custo) :-naturais(IdUt), naturais(IdServico), evolucao(consulta(Data, IdUt, IdServico, Custo)).
 
 % Remover utentes, serviços e consultas
 removerUtente(IdUt) :- 
@@ -113,5 +99,38 @@ custoTotalServicos([],0).
 custoTotalServicos([X|T],Custo) :- custoTotalServico(X,CustoSing), custoTotalServicos(T,Resto), Custo is CustoSing + Resto.
 custoTotalInst(Inst,Custo) :- servicosInstituicao(Inst,Servs), custoTotalServicos(Servs,Custo).
 
+naturais(X) :-X =:= round(X), X >= 1.
+% inteiro(X) :- X =:= round(X).
+
+evolucao(T):- findall(Invariante, +T :: Invariante, Lista),
+              insercao(T),
+              teste(Lista).
+
+insercao(T) :- assert(T).
+insercao(T) :- retract(T),!,fail.
+
+teste([]).
+teste([I|T]) :- I,teste(T).
+
+involucao(T) :-
+    findall(Invariante, -T :: Invariante, Lista),
+    remocao(T),
+    teste(Lista).
+
+remocao(T) :- retract(T).
+remocao(T) :- assert(T), !, fail.
+
+% checkString(S,R) :- atom_codes(S,R).
+comprimento([],0).
+comprimento([_|T],R1) :- comprimento(T,R), R1 is R + 1.
+
+%-----Invariantes
+
++utente(Id, _, _, _) :: (findall(Id,(utente(Id, _, _, _)),L),comprimento(L,1)).
+
++servico(Id, _, _, _) :: (findall(Id,(servico(Id, _, _, _)),L),comprimento(L,1)).
+
+% Um serviço pode ter vários utentes?
++consulta(_, U, S, _) :: (findall((U,S),(consulta(_, U, S, _)),L),comprimento(L,1)).
 
 % Extras
