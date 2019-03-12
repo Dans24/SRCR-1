@@ -76,7 +76,7 @@ servicosInstituicao(Instituicao, Z) :-
     findall(Id, servico(Id, _, Instituicao, _), Z). 
 
 servicosCidade(Cidade, Z) :-
-    findall(Id, servico(Id, _, Cidade, _), Z). 
+    findall(Id, servico(Id, _, _, Cidade), Z). 
 
 
 % Identificar os utentes de um serviço/instituição
@@ -89,8 +89,29 @@ utentesInstituicao(Inst, Z) :-
 
 % Identificar serviços realizados por utente/instituição/cidade
 
-% Calcular o custo total dos cuidados de saúde por utente/serviço/instituição/data
+% Realizados:- Serviço para o qual foi executado uma consulta
+% realizados na instituicao/cidade X
+realizadosInstituicao(IdInst,Z):-
+    findall(IdSer, (servico(IdSer, _, IdInst, _), consulta(_, _, IdSer, _)), Z).
+realizadosCidade(IdCid,Z):-
+    findall(IdSer, (servico(IdSer, _, _, IdCid), consulta(_, _, IdSer, _)), Z).
 
+% realizados ao utente X na instituição/cidade Y
+realizadosUtenteInstituicao(IdUt,IdInst,Z):-
+    findall(IdSer, (servico(IdSer, _, IdInst, _), consulta(_, IdUt, IdSer, _)), Z).
+realizadosUtenteCidade(IdUt,IdCid,Z):-
+    findall(IdSer, (servico(IdSer, _, _, IdCid), consulta(_, IdUt, IdSer, _)), Z).
+
+% Calcular o custo total dos cuidados de saúde por utente/serviço/instituição/data
+soma([],0).
+soma([H|T],Total) :- soma(T,Resto), Total is H + Resto.
+
+custoTotalUtente(IdUt,Custo) :- findall(X,consulta(_,IdUt,_,X),Custos) , soma(Custos,Custo).
+custoTotalServico(IdServ,Custo) :- findall(X,consulta(_,_,IdServ,X),Custos) , soma(Custos,Custo).
+custoTotalData(Data,Custo) :- findall(X,consulta(Data,_,_,X),Custos) , soma(Custos,Custo).
+custoTotalServicos([],0).
+custoTotalServicos([X|T],Custo) :- custoTotalServico(X,CustoSing), custoTotalServicos(T,Resto), Custo is CustoSing + Resto.
+custoTotalInst(Inst,Custo) :- servicosInstituicao(Inst,Servs), custoTotalServicos(Servs,Custo).
 
 
 % Extras
