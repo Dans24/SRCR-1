@@ -5,6 +5,9 @@
 % utente(IdUt, Nome, Idade, Cidade)
 :- dynamic utente/4.
 utente(1, carlos, 20, braga).
+% +utente(IdUt, Nome, Idade, Cidade)::(integer(IdUt), IdUt > 0, string(Nome), integer(Idade), Idade >= 0, string(Cidade), (comprimento(utente(IdUt, _, _, _), 1))).
+% +servico(IdServico, Descricao, Instituicao, Cidade)::(integer(IdServico), IdServico > 0, string(Descricao), string(Instituicao), string(Cidade), (comprimento(utente(IdServico, _, _, _), 1))).
+% +consulta(Data, IdUt, IdServico, Custo)::(string(Data), utente(IdUt, _, _, _), servico(IdServico, _, _, _), rational(Custo)). % falta comparar a data
 
 % servico(IdServico, Descricao, Instituicao, Cidade)
 :- dynamic servico/4.
@@ -21,7 +24,7 @@ consulta(20/10/1998, 1, 1, 10.0).
 % Registar utentes, serviços e consultas
 % Caso id seja igual, remove a ocorrência anterior
 % Apenas permite o registo de ids e idade em número natural
-registarUtente(IdUt, Nome, Idade, Cidade) :- naturais(IdUt), naturais(Idade), evolucao(utente(IdUt, Nome, Idade, Cidade)).
+registarUtente(IdUt, Nome, Idade, Cidade) :- evolucao(utente(IdUt, Nome, Idade, Cidade)).
 
 registarServico(IdServico, Descricao, Instituicao, Cidade) :- naturais(IdServico), evolucao(servico(IdServico, Descricao, Instituicao, Cidade)). 
                                 
@@ -99,7 +102,7 @@ custoTotalServicos([],0).
 custoTotalServicos([X|T],Custo) :- custoTotalServico(X,CustoSing), custoTotalServicos(T,Resto), Custo is CustoSing + Resto.
 custoTotalInst(Inst,Custo) :- servicosInstituicao(Inst,Servs), custoTotalServicos(Servs,Custo).
 
-naturais(X) :-X =:= round(X), X >= 1.
+natural(X) :- integer(X), X >= 1.
 % inteiro(X) :- X =:= round(X).
 
 evolucao(T):- findall(Invariante, +T :: Invariante, Lista),
@@ -126,11 +129,13 @@ comprimento([_|T],R1) :- comprimento(T,R), R1 is R + 1.
 
 %-----Invariantes
 
-+utente(Id, _, _, _) :: (findall(Id,(utente(Id, _, _, _)),L),comprimento(L,1)).
++utente(IdUt, _, Idade, _) :: (natural(IdUt), integer(Idade), findall(IdUt,(utente(IdUt, _, _, _)),L),comprimento(L,1)).
+-utente(IdUt, _, _, _) :: (consulta(_, IdUt, _, _)).
 
-+servico(Id, _, _, _) :: (findall(Id,(servico(Id, _, _, _)),L),comprimento(L,1)).
++servico(IdServico, _, _, _) :: (findall(IdServico,(servico(IdServico, _, _, _)),L),comprimento(L,1)).
+-servico(IdServico, _, _, _) :: (consulta(_, _, IdServico, _)).
 
 % Um serviço pode ter vários utentes?
-+consulta(_, U, S, _) :: (findall((U,S),(consulta(_, U, S, _)),L),comprimento(L,1)).
++consulta(_, IdUt, IdServico, _) :: (utente(IdUt, _, _, _), servico(IdServico, _, _, _)).
 
 % Extras
