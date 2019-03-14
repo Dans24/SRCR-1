@@ -6,6 +6,15 @@
 %UTENTES-------------------------------------
 :- dynamic utente/4.
 utente(1, carlos, 20, braga).
+utente(2, marco, 22, viana).
+utente(3, daniel, 21, porto).
+utente(4, ze, 25, barcelos).
+utente(5, cesar, 20, terceira).
+utente(6, luis, 29, porto).
+utente(7, angelo, 27, madeira).
+utente(8, miguel, 31, porto).
+utente(9, luis, 29, braga).
+utente(10, rui, 20, viana).
 
 % Invariantes
 % Utente tem de ter IdUt e idade um número natutal e não pode haver repetidos
@@ -20,10 +29,13 @@ utente(1, carlos, 20, braga).
 
 % servico(IdServico, Descricao, Instituicao, Cidade)
 :- dynamic servico/4.
-servico(1, exame1, hospitaldeBraga, braga).
-servico(2, exame2, hospitaldeBraga, braga).
-servico(3, exame3, motijeiro, porto).
-servico(4, exame4, hospitaldoPorto, porto).
+servico(1, examePulmoes, hospitaldeBraga, braga).
+servico(2, exameRins, hospitaldeBraga, braga).
+servico(3, exameTesta, motijeiro, porto).
+servico(4, fisioterapia, hospitaldoPorto, porto).
+servico(5, examePulmoes, hospitaldeBraguinha, braga).
+servico(6, exameCabeca, hospitaldeBraguinha, braga).
+servico(7, exameProstata, hospitaldeBraga, braga).
 
 %CONSULTA------------------------------------
 %consulta(Data, IdUt, IdServico, Custo)
@@ -31,6 +43,10 @@ servico(4, exame4, hospitaldoPorto, porto).
 :- dynamic consulta/4.
 % date(9,maio,1998)
 consulta(20/10/1998, 1, 1, 10.0).
+consulta(20/10/1998, 2, 1, 10.0).
+consulta(21/10/1998, 3, 2, 10.0).
+consulta(20/10/1998, 4, 3, 10.0).
+consulta(20/10/1998, 5, 7, 10.0).
 % Um serviço pode ter vários utentes?
 % Invariantes
 % Consulta tem de apontar para utentes e servicos que existem.
@@ -75,7 +91,7 @@ search(servico,cidade,C,RES):-findall((ID,NOME,C),servico(ID,NOME,_,C),RES).
 search(consultas,idUt,IdUt,RES):-findall((Data, IdUt, IdServico, Custo),consulta(Data, IdUt, IdServico, Custo),Z).
 search(consultas,data,Data,RES):-findall((Data, IdUt, IdServico, Custo),consulta(Data, IdUt, IdServico, Custo),Z).
 
-% Identificar serviços prestados por instituição/cidade/datas/custo
+% Identificar serviços(/consultas) prestados por instituição/cidade/datas/custo
 
 apagaAndJoin((Id,I),[],[],([Id],I)).
 apagaAndJoin((Id,I),[(X,I)|T],R,([X|J],Y)) :- apagaAndJoin((Id,I),T,R,(J,Y)).
@@ -84,17 +100,17 @@ apagaAndJoin((Id,I),[(X,Y)|T],[(X,Y)|R],J) :- I\=Y,apagaAndJoin((Id,I),T,R,J).
 joinAll([],[]).
 joinAll([H|T],[J|Res]) :- apagaAndJoin(H,T,R,J), joinAll(R,Res).  
 
-servicosInstituicao(R) :-
-    findall((Id,Instituicao), servico(Id, _, Instituicao, _), Z),joinAll(Z,R). 
+servicosPorInstituicao(Z) :- findall((Id,Inst), (servico(Id, _, Inst, _)), R), joinAll(R,Z).
 
-servicosInstituicao(Instituicao, Z) :-
-    findall(Id, servico(Id, _, Instituicao, _), Z). 
+consultasPorInstituicao(Inst, R) :- findall((A,B,IdServico,D), (servico(IdServico,_,Inst,_), consulta(A,B,IdServico, D)), R).
 
-servicosCidade(R) :-
-    findall((Id,Cidade), servico(Id,_,_,Cidade),Z),joinAll(Z,R).
+consultasPorCidade(Inst, R) :- findall((A,B,IdServico,D), (servico(IdServico,_,Inst,_), consulta(A,B,IdServico, D)), R).
 
-servicosCidade(Cidade, Z) :-
-    findall(Id, servico(Id, _, _, Cidade), Z). 
+%servicosCidade(R) :-
+ %   findall((Id,Cidade), servico(Id,_,_,Cidade),Z),joinAll(Z,R).
+
+%servicosCidade(Cidade, Z) :-
+ %   findall(Id, servico(Id, _, _, Cidade), Z). 
 
 % consultas 
 servicosPrestadosPorDatas(R) :-
