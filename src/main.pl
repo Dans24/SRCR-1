@@ -118,12 +118,11 @@ servicosPrestadosPorDatas(R) :-
 
 %% Identificar os utentes de um serviço/instituição
 utentesServico(IdSer, Z) :- 
-    findall(IdUt, consulta(_, IdUt, IdSer, _), Z).
+    findall((IdUt,N,I,C), (consulta(_, IdUt, IdSer, _),utente(IdUt,N,I,C)), Z).
 
 utentesInstituicao(Inst, Z) :- 
-    findall(IdUt, (servico(IdSer, _, Inst, _), consulta(_, IdUt, IdSer, _)), Z).
+    findall((IdUt,N,I,C), (servico(IdSer, _, Inst, _), consulta(_, IdUt, IdSer, _),utente(IdUt,N,I,C)), Z).
     
-
 %% Identificar serviços realizados por utente/instituição/cidade
 
 % Realizados:- Serviço para o qual foi executado uma consulta
@@ -180,3 +179,5 @@ comprimento([],0).
 comprimento([_|T],R1) :- comprimento(T,R), R1 is R + 1.
 
 % Extras
+
+%
