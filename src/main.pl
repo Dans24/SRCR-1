@@ -6,15 +6,27 @@
 %UTENTES-------------------------------------
 :- dynamic utente/4.
 utente(1, carlos, 20, braga).
+utente(2, marco, 22, viana).
+utente(3, daniel, 21, porto).
+utente(4, ze, 25, barcelos).
+utente(5, cesar, 20, terceira).
+utente(6, luis, 29, porto).
+utente(7, angelo, 27, madeira).
+utente(8, miguel, 31, porto).
+utente(9, luis, 29, braga).
+utente(10, rui, 20, viana).
 
 %SERVICOS------------------------------------
 
 % servico(IdServico, Descricao, Instituicao, Cidade)
 :- dynamic servico/4.
-servico(1, exame1, hospitaldeBraga, braga).
-servico(2, exame2, hospitaldeBraga, braga).
-servico(3, exame3, motijeiro, porto).
-servico(4, exame4, hospitaldoPorto, porto).
+servico(1, examePulmoes, hospitaldeBraga, braga).
+servico(2, exameRins, hospitaldeBraga, braga).
+servico(3, exameTesta, motijeiro, porto).
+servico(4, fisioterapia, hospitaldoPorto, porto).
+servico(5, examePulmoes, hospitaldeBraguinha, braga).
+servico(6, exameCabeca, hospitaldeBraguinha, braga).
+servico(7, exameProstata, hospitaldeBraga, braga).
 
 %CONSULTA------------------------------------
 %consulta(Data, IdUt, IdServico, Custo)
@@ -22,6 +34,10 @@ servico(4, exame4, hospitaldoPorto, porto).
 :- dynamic consulta/4.
 % date(9,maio,1998)
 consulta(20/10/1998, 1, 1, 10.0).
+consulta(20/10/1998, 2, 1, 10.0).
+consulta(21/10/1998, 3, 2, 10.0).
+consulta(20/10/1998, 4, 3, 10.0).
+consulta(20/10/1998, 5, 7, 10.0).
 % Um serviço pode ter vários utentes?
 
 %DATA---------------------------------------
@@ -84,7 +100,7 @@ search(servico,cidade,C,RES):-findall((ID,NOME,C),servico(ID,NOME,_,C),RES).
 search(consultas,idUt,IdUt,RES):-findall((Data, IdUt, IdServico, Custo),consulta(Data, IdUt, IdServico, Custo),RES).
 search(consultas,data,Data,RES):-findall((Data, IdUt, IdServico, Custo),consulta(Data, IdUt, IdServico, Custo),RES).
 
-% Identificar serviços prestados por instituição/cidade/datas/custo
+% Identificar serviços(/consultas) prestados por instituição/cidade/datas/custo
 
 apagaAndJoin((Id,I),[],[],([Id],I)).
 apagaAndJoin((Id,I),[(X,I)|T],R,([X|J],Y)) :- apagaAndJoin((Id,I),T,R,(J,Y)).
@@ -93,17 +109,17 @@ apagaAndJoin((Id,I),[(X,Y)|T],[(X,Y)|R],J) :- I\=Y,apagaAndJoin((Id,I),T,R,J).
 joinAll([],[]).
 joinAll([H|T],[J|Res]) :- apagaAndJoin(H,T,R,J), joinAll(R,Res).  
 
-servicosInstituicao(R) :-
-    findall((Id,Instituicao), servico(Id, _, Instituicao, _), Z),joinAll(Z,R). 
+servicosPorInstituicao(Z) :- findall((Id,Inst), (servico(Id, _, Inst, _)), R), joinAll(R,Z).
 
-servicosInstituicao(Instituicao, Z) :-
-    findall(Id, servico(Id, _, Instituicao, _), Z). 
+consultasPorInstituicao(Inst, R) :- findall((A,B,IdServico,D), (servico(IdServico,_,Inst,_), consulta(A,B,IdServico, D)), R).
 
-servicosCidade(R) :-
-    findall((Id,Cidade), servico(Id,_,_,Cidade),Z),joinAll(Z,R).
+consultasPorCidade(Inst, R) :- findall((A,B,IdServico,D), (servico(IdServico,_,Inst,_), consulta(A,B,IdServico, D)), R).
 
-servicosCidade(Cidade, Z) :-
-    findall(Id, servico(Id, _, _, Cidade), Z). 
+%servicosCidade(R) :-
+ %   findall((Id,Cidade), servico(Id,_,_,Cidade),Z),joinAll(Z,R).
+
+%servicosCidade(Cidade, Z) :-
+ %   findall(Id, servico(Id, _, _, Cidade), Z). 
 
 % consultas 
 servicosPrestadosPorDatas(R) :-
@@ -111,12 +127,11 @@ servicosPrestadosPorDatas(R) :-
 
 %% Identificar os utentes de um serviço/instituição
 utentesServico(IdSer, Z) :- 
-    findall(IdUt, consulta(_, IdUt, IdSer, _), Z).
+    findall((IdUt,N,I,C), (consulta(_, IdUt, IdSer, _),utente(IdUt,N,I,C)), Z).
 
 utentesInstituicao(Inst, Z) :- 
-    findall(IdUt, (servico(IdSer, _, Inst, _), consulta(_, IdUt, IdSer, _)), Z).
+    findall((IdUt,N,I,C), (servico(IdSer, _, Inst, _), consulta(_, IdUt, IdSer, _),utente(IdUt,N,I,C)), Z).
     
-
 %% Identificar serviços realizados por utente/instituição/cidade
 
 % Realizados:- Serviço para o qual foi executado uma consulta
@@ -201,20 +216,20 @@ top([(A,B)|T],RES) :- topTemp(A,V),
 top([(A,B)|T], RES) :- \+topTemp(A,_), evolucao(topTemp(A,B)), top(T, RES).
 
 % QuickSort
-% Diz o menor de 2 números
+% Menor de 2 números
 menor(A, B) :- number(A), number(B), A < B.
-% Diz o menor de 2 datas
+% Menor de 2 datas
 menor(data(_,_,A1), data(_,_,A2)) :- A1 < A2.
 menor(data(_,M1,A1), data(_,M2,A2)) :- A1 =:= A2, M1 < M2.
 menor(data(D1,M1,A1), data(D2,M2,A2)) :- A1 =:= A2, M1 >= M2, D1 =< D2.
-% Diz o menor de dois topTemp
+% Menor de dois topTemp
 menor(topTemp(_,V1), topTemp(_,V2)) :- V1 < V2.
 
+% Ordena uma lista
+quickSort([], []).
+quickSort([H|T], S) :- part(H, T, L1, R1), quickSort(L1, L), quickSort(R1, R), concat(L, [H|R], S).
 part(_, [], [], []).
 part(X, [H|T], [H|L], R) :- menor(H,X), part(X, T, L, R).
 part(X, [H|T], L, [H|R]) :- \+menor(H,X), part(X, T, L, R).
 concat([],L,L).
 concat([H|T], L, [H|R1]) :- concat(T, L, R1).
-quickSort([], []).
-quickSort([H|T], S) :- part(H, T, L1, R1), quickSort(L1, L), quickSort(R1, R), concat(L, [H|R], S).
-
