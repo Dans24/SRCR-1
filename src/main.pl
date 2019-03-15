@@ -7,16 +7,7 @@
 :- dynamic utente/4.
 utente(1, carlos, 20, braga).
 
-% Invariantes
-% Utente tem de ter IdUt e idade um número natutal e não pode haver repetidos
-+utente(IdUt, _, Idade, _) :: (natural(IdUt), natural(Idade), findall(IdUt,(utente(IdUt, _, _, _)),L),comprimento(L,1)).
--utente(IdUt, _, _, _) :: (findall(IdUt,(consulta(_, IdUt, _, _)),L),comprimento(L,0)).
-
 %SERVICOS------------------------------------
-% Invariantes
-% Servico tem de ter IdServico um número natural e não pode haver repetidos
-+servico(IdServico, _, _, _) :: (natural(IdServico), findall(IdServico,(servico(IdServico, _, _, _)),L),comprimento(L,1)).
--servico(IdServico, _, _, _) :: (findall(IdUt,(consulta(_, _, IdServico, _)),L),comprimento(L,0)).
 
 % servico(IdServico, Descricao, Instituicao, Cidade)
 :- dynamic servico/4.
@@ -32,7 +23,25 @@ servico(4, exame4, hospitaldoPorto, porto).
 % date(9,maio,1998)
 consulta(20/10/1998, 1, 1, 10.0).
 % Um serviço pode ter vários utentes?
-% Invariantes
+
+%DATA---------------------------------------
+%data(Dia, Mes, Ano)
+data(D,M,A) :- natural(D), D =< 31, natural(M), M =< 12, natural(A).
+
+% Um serviço pode ter vários utentes?
+
+%INVARIANTES---------------------------------
+% Utente
+% Utente tem de ter IdUt e idade um número natutal e não pode haver repetidos
++utente(IdUt, _, Idade, _) :: (natural(IdUt), natural(Idade), findall(IdUt,(utente(IdUt, _, _, _)),L),comprimento(L,1)).
+-utente(IdUt, _, _, _) :: (findall(IdUt,(consulta(_, IdUt, _, _)),L),comprimento(L,0)).
+
+% Servico
+% Servico tem de ter IdServico um número natural e não pode haver repetidos
++servico(IdServico, _, _, _) :: (natural(IdServico), findall(IdServico,(servico(IdServico, _, _, _)),L),comprimento(L,1)).
+-servico(IdServico, _, _, _) :: (findall(IdServico,(consulta(_, _, IdServico, _)),L),comprimento(L,0)).
+
+% Consulta
 % Consulta tem de apontar para utentes e servicos que existem.
 +consulta(_, IdUt, IdServico, _) :: (utente(IdUt, _, _, _), servico(IdServico, _, _, _)).
 
@@ -72,8 +81,8 @@ search(servico,id,ID,RES):-findall((ID,NOME,C),servico(ID,NOME,_,C),RES).
 search(servico,intituicao,I,RES):-findall((ID,NOME,C),servico(ID,NOME,I,C),RES).
 search(servico,cidade,C,RES):-findall((ID,NOME,C),servico(ID,NOME,_,C),RES).
 
-search(consultas,idUt,IdUt,RES):-findall((Data, IdUt, IdServico, Custo),consulta(Data, IdUt, IdServico, Custo),Z).
-search(consultas,data,Data,RES):-findall((Data, IdUt, IdServico, Custo),consulta(Data, IdUt, IdServico, Custo),Z).
+search(consultas,idUt,IdUt,RES):-findall((Data, IdUt, IdServico, Custo),consulta(Data, IdUt, IdServico, Custo),RES).
+search(consultas,data,Data,RES):-findall((Data, IdUt, IdServico, Custo),consulta(Data, IdUt, IdServico, Custo),RES).
 
 % Identificar serviços prestados por instituição/cidade/datas/custo
 
@@ -159,8 +168,53 @@ involucao(T) :-
 remocao(T) :- retract(T).
 remocao(T) :- assert(T), !, fail.
 
+involucaoLista([]).
+involucaoLista([H|T]) :- involucao(H), involucaoLista(T).
+
 % checkString(S,R) :- atom_codes(S,R).
 comprimento([],0).
 comprimento([_|T],R1) :- comprimento(T,R), R1 is R + 1.
 
 % Extras
+% Retorna o histórico do cliente (Data, Descricao, Instituicao, Custo)
+historicoUtente(IdUt, RES) :- findall((Data, Descricao, Instituicao, Custo),(
+                                consulta(Data, IdUt, IdServico, Custo),
+                                servico(IdServico, Descricao, Instituicao, _)),RES).
+
+% Retorna a lista de Instituições ordenada da com mais a menos lucro
+topInstituicoesLucrativas(RES) :- findall((Instituicao, Custo),(
+                                    servico(IdServico, _, Instituicao, _),
+                                    consulta(_, _, IdServico, Custo)), L),
+                                top(L, RES).
+
+% Base de conhecimento que guarda o par instituição e lucro.
+:- dynamic topTemp/2.
+
+% Ordena a lista de pares instituições e lucro, pelo seu lucro
+top([],RES) :- findall(topTemp(A,V),(topTemp(A,V)),L), sort(L, RES), involucaoLista(L).
+
+top([(A,B)|T],RES) :- topTemp(A,V),
+                    N is V + B,
+                    evolucao(topTemp(A,N)),
+                    involucao(topTemp(A,V)), top(T, RES).
+
+top([(A,B)|T], RES) :- \+topTemp(A,_), evolucao(topTemp(A,B)), top(T, RES).
+
+% QuickSort
+% Diz o menor de 2 números
+menor(A, B) :- number(A), number(B), A < B.
+% Diz o menor de 2 datas
+menor(data(_,_,A1), data(_,_,A2)) :- A1 < A2.
+menor(data(_,M1,A1), data(_,M2,A2)) :- A1 =:= A2, M1 < M2.
+menor(data(D1,M1,A1), data(D2,M2,A2)) :- A1 =:= A2, M1 >= M2, D1 =< D2.
+% Diz o menor de dois topTemp
+menor(topTemp(_,V1), topTemp(_,V2)) :- V1 < V2.
+
+part(_, [], [], []).
+part(X, [H|T], [H|L], R) :- menor(H,X), part(X, T, L, R).
+part(X, [H|T], L, [H|R]) :- \+menor(H,X), part(X, T, L, R).
+concat([],L,L).
+concat([H|T], L, [H|R1]) :- concat(T, L, R1).
+quickSort([], []).
+quickSort([H|T], S) :- part(H, T, L1, R1), quickSort(L1, L), quickSort(R1, R), concat(L, [H|R], S).
+
