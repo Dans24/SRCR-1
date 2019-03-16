@@ -49,8 +49,13 @@ data(D,M,A) :- natural(D), D =< 31, natural(M), M =< 12, natural(A).
 %INVARIANTES---------------------------------
 % Utente
 % Utente tem de ter IdUt e idade um número natutal e não pode haver repetidos
-+utente(IdUt, _, Idade, _) :: (natural(IdUt), natural(Idade), findall(IdUt,(utente(IdUt, _, _, _)),L),comprimento(L,1)).
--utente(IdUt, _, _, _) :: (findall(IdUt,(consulta(_, IdUt, _, _)),L),comprimento(L,0)).
++utente(IdUt, _, Idade, _) :: (natural(IdUt), 
+                              natural(Idade),
+                              findall(IdUt,(utente(IdUt, _, _, _)),L),
+                              comprimento(L,1)).
+
+-utente(IdUt, _, _, _) :: (findall(IdUt,(consulta(_, IdUt, _, _)),L),
+                          comprimento(L,0)).
 
 % Servico
 % Servico tem de ter IdServico um número natural e não pode haver repetidos
@@ -64,22 +69,16 @@ data(D,M,A) :- natural(D), D =< 31, natural(M), M =< 12, natural(A).
 % Registar utentes, serviços e consultas
 % Caso id seja igual, remove a ocorrência anterior
 % Apenas permite o registo de ids e idade em número natural
-registarUtente(IdUt, Nome, Idade, Cidade) :- evolucao(utente(IdUt, Nome, Idade, Cidade)).
 
-registarServico(IdServico, Descricao, Instituicao, Cidade) :- evolucao(servico(IdServico, Descricao, Instituicao, Cidade)). 
-                                
-registarConsulta(Data, IdUt, IdServico, Custo) :- evolucao(consulta(Data, IdUt, IdServico, Custo)).
+registar(T) :- findall(Invariante, +T :: Invariante, Lista),
+               insercao(T),
+               teste(Lista).
 
 %% Remover utentes, serviços e consultas
-removerUtente(IdUt) :- 
-    involucao(utente(IdUt, _, _, _)).
 
-removerServico(IdServico) :- 
-    involucao(servico(IdServico, _, _, _)).
-
-removerConsulta(IdUt, IdServico) :- 
-    involucao(consulta(_, IdUt, IdServico, _)).
-
+remover(T) :- findall(Invariante, -T :: Invariante, Lista),
+              remocao(T),
+              teste(Lista).
 
 %% Identificar as instituições prestadoras de serviços;
 instituicoesComServicos(Z) :-
@@ -165,20 +164,11 @@ natural(X) :- integer(X), X >= 1.
 soma([],0).
 soma([H|T],Total) :- soma(T,Resto), Total is H + Resto.
 
-evolucao(T):- findall(Invariante, +T :: Invariante, Lista),
-              insercao(T),
-              teste(Lista).
-
 insercao(T) :- assert(T).
 insercao(T) :- retract(T),!,fail.
 
 teste([]).
 teste([I|T]) :- I,teste(T).
-
-involucao(T) :-
-    findall(Invariante, -T :: Invariante, Lista),
-    remocao(T),
-    teste(Lista).
 
 remocao(T) :- retract(T).
 remocao(T) :- assert(T), !, fail.
