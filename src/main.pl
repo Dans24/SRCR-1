@@ -33,16 +33,18 @@ servico(7, exameProstata, hospitaldeBraga, braga).
 % +consulta(Data, IdUt, IdServico, Custo)::(string(Data), utente(IdUt, _, _, _), servico(IdServico, _, _, _), rational(Custo)). % falta comparar a data
 :- dynamic consulta/4.
 % date(9,maio,1998)
-consulta(20/10/1998, 1, 1, 10.0).
-consulta(20/10/1998, 2, 1, 10.0).
-consulta(21/10/1998, 3, 2, 10.0).
-consulta(20/10/1998, 4, 3, 10.0).
-consulta(20/10/1998, 5, 7, 10.0).
+consulta(data(20,10,1998), 1, 1, 10.0).
+consulta(data(20,10,1998), 2, 1, 10.0).
+consulta(data(21,10,1998), 3, 2, 10.0).
+consulta(data(20,10,1998), 4, 3, 10.0).
+consulta(data(20,10,1998), 5, 7, 10.0).
+consulta(data(29,10,1998), 1, 4, 15.0).
+consulta(data(29,10,1998), 10, 7, 15.0).
 % Um serviço pode ter vários utentes?
 
 %DATA---------------------------------------
 %data(Dia, Mes, Ano)
-data(D,M,A) :- natural(D), D =< 31, natural(M), M =< 12, natural(A).
+data(D,M,A) :- natural(D), D =< 31, natural(M), M =< 12, integer(A).
 
 % Um serviço pode ter vários utentes?
 
@@ -60,6 +62,10 @@ data(D,M,A) :- natural(D), D =< 31, natural(M), M =< 12, natural(A).
 % Consulta
 % Consulta tem de apontar para utentes e servicos que existem.
 +consulta(_, IdUt, IdServico, _) :: (utente(IdUt, _, _, _), servico(IdServico, _, _, _)).
+
+% TopTemp
+% Lucro tem de ser um número e não pode haver mais do que 2 topTemp da mesma instituição
++topTemp(A, B) :: (number(B), findall(A,(topTemp(A,_)),L), comprimento(L,N), N =< 2).
 
 % Registar utentes, serviços e consultas
 % Caso id seja igual, remove a ocorrência anterior
@@ -194,7 +200,8 @@ comprimento([_|T],R1) :- comprimento(T,R), R1 is R + 1.
 % Retorna o histórico do cliente (Data, Descricao, Instituicao, Custo)
 historicoUtente(IdUt, RES) :- findall((Data, Descricao, Instituicao, Custo),(
                                 consulta(Data, IdUt, IdServico, Custo),
-                                servico(IdServico, Descricao, Instituicao, _)),RES).
+                                servico(IdServico, Descricao, Instituicao, _)),L),
+                              quickSort(L,RES).
 
 % Retorna a lista de Instituições ordenada da com mais a menos lucro
 topInstituicoesLucrativas(RES) :- findall((Instituicao, Custo),(
@@ -202,11 +209,31 @@ topInstituicoesLucrativas(RES) :- findall((Instituicao, Custo),(
                                     consulta(_, _, IdServico, Custo)), L),
                                 top(L, RES).
 
+% Retorna a lista de Servicos ordenados do com mais a menos consultas
+topServicosLucrativos(RES) :- findall((IdServico, Custo),(
+                                    servico(IdServico, _, _, _),
+                                    consulta(_, _, IdServico, Custo)), L),
+                                top(L, RES).
+
+% Retorna a lista de Servicos ordenados do com mais a menos consultas
+topServicosFrequentados(RES) :- findall((IdServico, 1),(
+                                    servico(IdServico, _, _, _),
+                                    consulta(_, _, IdServico, _)), L),
+                                top(L, RES).
+
+% Retorna a lista de Cidades com utentes a frequentar serviços de cidades diferentes
+topCidadesSemServico(RES) :- findall((CidadeUtente, 1),(
+                                    utente(IdUt, _, _, CidadeUtente),
+                                    servico(IdServico, _, _, CidadeServico),
+                                    consulta(_, IdUt, IdServico, _),
+                                    CidadeUtente \= CidadeServico), L),
+                                top(L, RES).
+
 % Base de conhecimento que guarda o par instituição e lucro.
 :- dynamic topTemp/2.
 
-% Ordena a lista de pares instituições e lucro, pelo seu lucro
-top([],RES) :- findall(topTemp(A,V),(topTemp(A,V)),L), sort(L, RES), involucaoLista(L).
+% Ordena as chaves do maior para o menor valor total e retorna o valor total.
+top([],RES) :- findall(topTemp(A,V),(topTemp(A,V)),L), quickSort(L, RES), involucaoLista(L).
 
 top([(A,B)|T],RES) :- topTemp(A,V),
                     N is V + B,
@@ -217,19 +244,23 @@ top([(A,B)|T], RES) :- \+topTemp(A,_), evolucao(topTemp(A,B)), top(T, RES).
 
 % QuickSort
 % Menor de 2 números
-menor(A, B) :- number(A), number(B), A < B.
+ord(A, B) :- number(A), number(B), A < B.
+% Maior de 2 números
+ord(maior(A), maior(B)) :- menor(B,A).
 % Menor de 2 datas
-menor(data(_,_,A1), data(_,_,A2)) :- A1 < A2.
-menor(data(_,M1,A1), data(_,M2,A2)) :- A1 =:= A2, M1 < M2.
-menor(data(D1,M1,A1), data(D2,M2,A2)) :- A1 =:= A2, M1 >= M2, D1 =< D2.
+ord(data(_,_,A1), data(_,_,A2)) :- A1 < A2.
+ord(data(_,M1,A1), data(_,M2,A2)) :- A1 =:= A2, M1 < M2.
+ord(data(D1,M1,A1), data(D2,M2,A2)) :- A1 =:= A2, M1 >= M2, D1 =< D2.
+% Menor de 4-tuplo, só compara o primeiro
+ord((A,_,_,_),(B,_,_,_)) :- menor(A,B).
 % Menor de dois topTemp
-menor(topTemp(_,V1), topTemp(_,V2)) :- V1 < V2.
+ord(topTemp(_,V1),  topTemp(_,V2)) :- V1 > V2.
 
-% Ordena uma lista
+% Ordena uma lista do menor para maior
 quickSort([], []).
 quickSort([H|T], S) :- part(H, T, L1, R1), quickSort(L1, L), quickSort(R1, R), concat(L, [H|R], S).
 part(_, [], [], []).
-part(X, [H|T], [H|L], R) :- menor(H,X), part(X, T, L, R).
-part(X, [H|T], L, [H|R]) :- \+menor(H,X), part(X, T, L, R).
+part(X, [H|T], [H|L], R) :- ord(H,X), part(X, T, L, R).
+part(X, [H|T], L, [H|R]) :- \+ord(H,X), part(X, T, L, R).
 concat([],L,L).
 concat([H|T], L, [H|R1]) :- concat(T, L, R1).
