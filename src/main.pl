@@ -2,6 +2,14 @@
 % Grupo 1
 :- op( 900,xfy,'::' ).
 
+evolucao(T) :- findall(Invariante, +T :: Invariante, Lista),
+               insercao(T),
+               teste(Lista).
+
+involucao(T) :- findall(Invariante, -T :: Invariante, Lista),
+              remocao(T),
+              teste(Lista).
+
 % utente(IdUt, Nome, Idade, Cidade)
 %UTENTES-------------------------------------
 :- dynamic utente/4.
@@ -72,19 +80,15 @@ data(D,M,A) :- natural(D), D =< 31, natural(M), M =< 12, integer(A).
 % Lucro tem de ser um número e não pode haver mais do que 2 topTemp da mesma instituição
 +topTemp(A, B) :: (number(B), findall(A,(topTemp(A,_)),L), comprimento(L,N), N =< 2).
 
-% Registar utentes, serviços e consultas
+% evolucao utentes, serviços e consultas
 % Caso id seja igual, remove a ocorrência anterior
 % Apenas permite o registo de ids e idade em número natural
 
-registar(T) :- findall(Invariante, +T :: Invariante, Lista),
-               insercao(T),
-               teste(Lista).
+registar(T) :- evolucao(T).
 
 %% Remover utentes, serviços e consultas
 
-remover(T) :- findall(Invariante, -T :: Invariante, Lista),
-              remocao(T),
-              teste(Lista).
+remover(T) :- involucao(T).
 
 %% Identificar as instituições prestadoras de serviços;
 instituicoesComServicos(Z) :-
@@ -188,7 +192,7 @@ comprimento([_|T],R1) :- comprimento(T,R), R1 is R + 1.
 
 % Extras
 % Retorna o histórico do cliente (Data, Descricao, Instituicao, Custo)
-historicoUtente(IdUt, RES) :- findall((Data, Descricao, Instituicao, Custo),(
+historicoUtente(IdUt, RES) :- findall(dadosConsulta(Data, Descricao, Instituicao, Custo),(
                                 consulta(Data, IdUt, IdServico, Custo),
                                 servico(IdServico, Descricao, Instituicao, _)),L),
                               quickSort(L,RES).
@@ -242,7 +246,7 @@ ord(data(_,_,A1), data(_,_,A2)) :- A1 < A2.
 ord(data(_,M1,A1), data(_,M2,A2)) :- A1 =:= A2, M1 < M2.
 ord(data(D1,M1,A1), data(D2,M2,A2)) :- A1 =:= A2, M1 >= M2, D1 =< D2.
 % Menor de 4-tuplo, só compara o primeiro
-ord((A,_,_,_),(B,_,_,_)) :- menor(A,B).
+ord(dadosConsulta(A,_,_,_),dadosConsulta(B,_,_,_)) :- ord(B,A).
 % Menor de dois topTemp
 ord(topTemp(_,V1),  topTemp(_,V2)) :- V1 > V2.
 
