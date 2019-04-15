@@ -26,3 +26,22 @@ si( Questao,desconhecido ) :-
 nao( Questao ) :-
     Questao, !, fail.
 nao( Questao ).
+
+%e predicado conjunção
+e(T1,T2,verdadeiro):- si(T1,verdadeiro),si(T2,verdadeiro).
+e(T1,T2,falso):- si(T1,falso).
+e(T1,T2,falso):- si(T2,falso).
+e(T1,T2,desconhecido).
+
+%ou predicado conjunção
+ou(T1,T2,falso):- si(T1,falso),si(T2,falso).
+ou(T1,T2,verdadeiro):- si(T1,verdadeiro).
+ou(T1,T2,verdadeiro):- si(T2,verdadeiro).
+ou(T1,T2,desconhecido).
+
+%xor
+xor(T1,T2,verdadeiro):- si(T1,verdadeiro),si(T2,falso).
+xor(T1,T2,verdadeiro):- si(T1,falso),si(T2,verdadeiro).
+xor(T1,T2,falso):- si(T1,verdadeiro),si(T2,verdadeiro).
+xor(T1,T2,falso):- si(T1,falso),si(T2,falso).
+xor(T1,T2,desconhecido).
