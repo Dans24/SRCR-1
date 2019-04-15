@@ -58,6 +58,30 @@ excecao(cuidado(IdUt, IdPrest, Descricao, Custo)) :- cuidado(IdUt, IdPrest, Desc
 % O custo do cuidado pode ser nulo interdito
 excecao(cuidado(IdUt, IdPrest, Descricao, Custo)) :- cuidado(IdUt, IdPrest, Descricao, nuloInterdito).
 
+
+excecao(utente(ID,NOME,IDADE,MORADA)):-nomeIncerto(ID,NOME).
+excecao(utente(ID,NOME,IDADE,MORADA)):-idadeIncerta(ID,IDADE).
+excecao(utente(ID,NOME,IDADE,MORADA)):-moradaIncerta(ID,MORADA).
+
+%recursividade feita em primeiro para não fazer asserts caso algum invariante falhe.  
+%Gera exceções de incertezas para utentes e Nomes
+genUtNomeExcecoes(Id,[]).
+genUtNomeExcecoes(Id,[X|T]):- genUtNomeExcecoes(Id,T) ,assert(nomeIncerto(Id,X)).
+%Gera exceções de incertezas para utentes e Idades
+genUtIdadeExcecoes(Id,[]).
+genUtIdadeExcecoes(Id,[X|T]):- genUtIdadeExcecoes(Id,T) ,assert(idadeIncerta(Id,X)).
+%Gera exceções de incertezas para utentes e Moradas
+genUtMoradaExcecoes(Id,[]).
+genUtMoradaExcecoes(Id,[X|T]):- genUtMoradaExcecoes(Id,T) ,assert(moradaIncerta(Id,X)).
+
+%Gera exceçoes de moradas se valor for incerto
+addUtente(Id,[X|T],I,M):-addUtente(Id,nuloIncerto,I,M),genUtNomeExcecoes(Id,[X|T]).
+%Gera excecoes de idade se valor for incerto
+addUtente(Id,NOME,[X|T],M):-addUtente(Id,NOME,nuloIncerto,M),genUtIdadeExcecoes(Id,[X|T]).
+%Gera excecoes de morada se valor for incerto
+addUtente(Id,NOME,I,[X|T]):-addUtente(Id,NOME,I,nuloIncerto),genUtMoradaExcecoes(Id,[X|T]).
+addUtente(Id,N,I,M):-evolucao(utente(Id,N,I,M)).
+
 utente(1, daniel, nuloInterdito, nuloInterdito).
 prestador(1, miguel, nulo, nulo).
 cuidado(1, 1, nulo, nulo).
