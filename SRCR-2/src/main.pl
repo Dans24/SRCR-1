@@ -4,6 +4,10 @@ nuloInterdito(nuloInterdito).
 % UTENTE--------------------------------------------------------------------------------------------
 % utente(#IdUt, Nome, Idade, Morada)
 :- dynamic utente/4.
+:- dynamic utentNomeIncerto/2.
+:- dynamic utentIdadeIncerta/2.
+:- dynamic utentMoradaIncerta/2.
+
 -utente(IdUt, Nome, Idade, Morada) :- nao(utente(IdUt, Nome, Idade, Morada)),
                                       nao(excecao(utente(IdUt, Nome, Idade, Morada))).
 
@@ -53,6 +57,9 @@ genUtMoradaExcecoes(Id,[X|T]):- genUtMoradaExcecoes(Id,T) ,assert(utentMoradaInc
 % PRESTADOR------------------------------------------------------------------------------------------
 % prestador(#IdPrest, Nome, Especialidade, Instituicao)
 :- dynamic prestador/4.
+:- dynamic presNomeIncerto/2.
+:- dynamic presEspecialidadeIncerta/2.
+:- dynamic presInstituicaoIncerta/2.
 -prestador(IdPrest, Nome, Especialidade, Instituicao) :- nao(prestador(IdPrest, Nome, Especialidade, Instituicao)),
                                                          nao(excecao(prestador(IdPrest, Nome, Especialidade, Instituicao))).
 
@@ -90,8 +97,17 @@ genPresInstituicaoExcecoes(Id,[X|T]):- genPresInstituicaoExcecoes(Id,T) ,assert(
 % CUIDADO--------------------------------------------------------------------------------------------
 % cuidado(#IdUt, #IdPrest, Descricao, Custo)
 :- dynamic cuidado/6.
+:- dynamic cuidCustoIncerto/2.
+:- dynamic cuidDataIncerta/2.
+:- dynamic cuidUtenteIncerto/2.
+:- dynamic cuidPrestadorIncerto/2.
+
 -cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :- nao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)),
                                              nao(excecao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo))).
+
+%% Invariantes de Cuidados 
+
+
 
 %% Excecoes de Cuidado
 % A data do cuidado pode ser nulo
@@ -121,19 +137,21 @@ excecao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)) :- cuidPrestador
 excecao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)) :- cuidCustoIncerto(IdCuid,Custo).
 %Gera exceções de incertezas para consultas de Datas
 genCuidadoDataExcec(IdCuid,[]).
-genCuidadoDataExcec(IdCuid,[X|T]) :- genCuidadoDataExcec(Id,T), assert(cuidDataIncerta(IdCuid,X).
+genCuidadoDataExcec(IdCuid,[X|T]) :- genCuidadoDataExcec(IdCuid,T), assert(cuidDataIncerta(IdCuid,X)).
 %Gera exceções de incertezas para consultas de Utentes
 genCuidadoUtExcec(IdCuid,[]).
-genCuidadoUtExcec(IdCuid,[X|T]) :- genCuidadoUtExcec(Id,T), assert(cuidUtenteIncerto(IdCuid,X).
+genCuidadoUtExcec(IdCuid,[X|T]) :- genCuidadoUtExcec(IdCuid,T), assert(cuidUtenteIncerto(IdCuid,X)).
 %Gera exceções de incertezas para consultas de Prestadores
 genCuidadoPresExcec(IdCuid,[]).
-genCuidadoPresExcec(IdCuid,[X|T]) :- genCuidadoPresExcec(Id,T), assert(cuidPrestadorIncerto(IdCuid,X).
+genCuidadoPresExcec(IdCuid,[X|T]) :- genCuidadoPresExcec(IdCuid,T), assert(cuidPrestadorIncerto(IdCuid,X)).
 %Gera exceções de incertezas para consultas de Custos
 genCuidadoCustoExcec(IdCuid,[]).
-genCuidadoCustoExcec(IdCuid,[X|T]) :- genCuidadoCustoExcec(Id,T), assert(cuidCustoIncerto(IdCuid,X).
+genCuidadoCustoExcec(IdCuid,[X|T]) :- genCuidadoCustoExcec(IdCuid,T), assert(cuidCustoIncerto(IdCuid,X)).
 %%%--------------------------------------------------------------------------------------------------
 
 % Manipulacao da Base de Conhecimento----------------------------------------------------------------
+
+%% Inserção no Sistema --------------------------------------
 % Adiciona Utentes ao sistema
 %% Gera exceçoes de moradas se valor for incerto
 addUtente(Id,[X|T],I,M):-addUtente(Id,nuloIncerto,I,M),genUtNomeExcecoes(Id,[X|T]).
@@ -154,6 +172,9 @@ addCuidado(cuidado(IdCuid, Data, [X|T], IdPrest, Descricao, Custo)):- addCuidado
 addCuidado(cuidado(IdCuid, Data, IdUt, [X|T], Descricao, Custo)):- addCuidado(cuidado(IdCuid, Data, IdUt, nuloIncerto, Descricao, Custo)), genCuidadoPresExcec(IdCuid,[X|T]).
 addCuidado(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, [X|T])):- addCuidado(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, nuloIncerto)), genCuidadoCustoExcec(IdCuid,[X|T]).
 addCuidado(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)):- evolucao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)).
+
+%% Remoção do Sistema --------------------------------
+
 
 utente(1, daniel, nuloInterdito, nuloInterdito).
 prestador(1, miguel, nulo, nulo).
