@@ -1,3 +1,5 @@
+?- consult(['inv.pl','si.pl']).
+
 nuloInterdito(nuloInterdito).
 nuloIncerto(nuloIncerto).
 nulo(nulo).
@@ -19,7 +21,6 @@ nulo(nuloInterdito).
 +utente(IdUt, Nome, Idade, Morada) :: (
                                         findall(IdUt, utente(IdUt, Nome, Idade, Morada), L1),
                                         comprimento(L1, 1), % Não pode haver repetidos
-                                        findall((Nome2, Idade2, Morada2), utente(IdUt, Nome2, Idade2, Morada2), L2),
                                         ou( 
                                             e( integer(Idade), Idade >= 0, verdadeiro), 
                                             nulo(Idade), 
@@ -71,8 +72,14 @@ genUtMoradaExcecoes(Id,[X|T]):- genUtMoradaExcecoes(Id,T) ,assert(utentMoradaInc
                                                          nao(excecao(prestador(IdPrest, Nome, Especialidade, Instituicao))).
 
 %% Invariantes de Prestador
-
-
++prestador(IdPrest, Nome, Especialidade, Instituicao) :: (
+                                                            findall(IdUt, prestador(IdPrest, Nome, Especialidade, Instituicao), L1),
+                                                            comprimento(L1, 1) % Não pode haver repetidos
+                                                         ).
+-prestador(IdPrest, Nome, Especialidade, Instituicao) :: (
+                                                            findall(IdCuid, cuidado(IdCuid,_,_,IdPrest,_,_),L1),
+                                                            comprimento(L1, 0)
+                                                         ).
 %% Excecoes de Prestador 
 % O nome do prestador pode ser nulo
 excecao(prestador(IdPrest, Nome, Especialidade, Instituicao)) :- prestador(IdPrest, nulo, Especialidade2, Instituicao2).
