@@ -15,6 +15,7 @@ nulo(nuloInterdito).
                                       nao(excecao(utente(IdUt, Nome, Idade, Morada))).
 
 %% Invariantes de Utente
+%% A idade de um utente só pode ser nula ou um inteiro positivo
 +utente(IdUt, Nome, Idade, Morada) :: (
                                         findall(IdUt, utente(IdUt, Nome, Idade, Morada), L1),
                                         comprimento(L1, 1), % Não pode haver repetidos
@@ -23,9 +24,13 @@ nulo(nuloInterdito).
                                             e( integer(Idade), Idade >= 0, verdadeiro), 
                                             nulo(Idade), 
                                             verdadeiro
-                                        ) % Idade é um número natural ou é um nulo.
-                                      ).      
-
+                                        ) % Idade é um inteiro positivo ou é um nulo.
+                                      ).
+%% Um utente não pode ser removido se ouver consultas com ele
+-utente(IdUt, Nome, Idade, Morada) :: (
+                                        findall(IdCuid, cuidado(IdCuid,_,IdUt,_,_,_),L1),
+                                        comprimento(L1, 0)
+                                      ).
 %% Exceções de utente
 % O nome do utente pode ser nulo
 excecao(utente(IdUt, Nome, Idade, Morada)) :- utente(IdUt, nulo, Idade, Morada).
