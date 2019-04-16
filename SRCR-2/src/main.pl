@@ -1,5 +1,8 @@
 nuloInterdito(nuloInterdito).
-
+nuloIncerto(nuloIncerto).
+nulo(nulo).
+nulo(nuloIncerto).
+nulo(nuloInterdito).
 
 % UTENTE--------------------------------------------------------------------------------------------
 % utente(#IdUt, Nome, Idade, Morada)
@@ -12,31 +15,30 @@ nuloInterdito(nuloInterdito).
                                       nao(excecao(utente(IdUt, Nome, Idade, Morada))).
 
 %% Invariantes de Utente
-+utente(IdUt, Nome, Idade, Morada) :: (findall(IdUt, utente(IdUt, Nome, Idade, Morada), L1),
++utente(IdUt, Nome, Idade, Morada) :: (
+                                        findall(IdUt, utente(IdUt, Nome, Idade, Morada), L1),
                                         comprimento(L1, 1), % Não pode haver repetidos
                                         findall((Nome2, Idade2, Morada2), utente(IdUt, Nome2, Idade2, Morada2), L2),
-                                        IdUt >= 1, integer(IdUt), % Id é um número natural
-                                        Idade >= 0, integer(Idade)). % Idade é um número natural ou 0
-+utente(IdUt, Nome, nulo, Morada) :: (findall(IdUt, utente(IdUt, Nome, Idade, Morada), L),
-                                        comprimento(L, 1),
-                                        IdUt >= 1, integer(IdUt)).
-+utente(IdUt, Nome, nuloInterdito, Morada) :: (findall(IdUt, utente(IdUt, Nome, Idade, Morada), L),
-                                        comprimento(L, 1),
-                                        IdUt >= 1, integer(IdUt)).
+                                        ou( 
+                                            e( integer(Idade), Idade >= 0, verdadeiro), 
+                                            nulo(Idade), 
+                                            verdadeiro
+                                        ) % Idade é um número natural ou é um nulo.
+                                      ).      
 
 %% Exceções de utente
 % O nome do utente pode ser nulo
-excecao(utente(IdUt, Nome, Idade, Morada)) :- utente(IdUt, nulo, Idade2, Morada2).
+excecao(utente(IdUt, Nome, Idade, Morada)) :- utente(IdUt, nulo, Idade, Morada).
 % O nome do utente pode ser nulo interdito
-excecao(utente(IdUt, Nome, Idade, Morada)) :- utente(IdUt, nuloInterdito, Idade2, Morada2).
+excecao(utente(IdUt, Nome, Idade, Morada)) :- utente(IdUt, nuloInterdito, Idade, Morada).
 % A idade do utente pode ser nulo
-excecao(utente(IdUt, Nome, Idade, Morada)) :- utente(IdUt, Nome2, nulo, Morada2).
+excecao(utente(IdUt, Nome, Idade, Morada)) :- utente(IdUt, Nome, nulo, Morada).
 % A idade do utente pode ser nulo interdito
-excecao(utente(IdUt, Nome, Idade, Morada)) :- utente(IdUt, Nome2, Idade2, nuloInterdito).
+excecao(utente(IdUt, Nome, Idade, Morada)) :- utente(IdUt, Nome, Idade, nuloInterdito).
 % A morada do utente pode ser nulo
-excecao(utente(IdUt, Nome, Idade, Morada)) :- utente(IdUt, Nome2, Idade2, nulo).
+excecao(utente(IdUt, Nome, Idade, Morada)) :- utente(IdUt, Nome, Idade, nulo).
 % A morada do utente pode ser nulo interdito
-excecao(utente(IdUt, Nome, Idade, Morada)) :- utente(IdUt, Nome2, Idade2, nuloInterdito).
+excecao(utente(IdUt, Nome, Idade, Morada)) :- utente(IdUt, Nome, Idade, nuloInterdito).
 %exceções sobre os nulos incertos nos utentes
 excecao(utente(ID,NOME,IDADE,MORADA)):-utentNomeIncerto(ID,NOME).
 excecao(utente(ID,NOME,IDADE,MORADA)):-utentIdadeIncerta(ID,IDADE).
@@ -175,6 +177,9 @@ addCuidado(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)):- evolucao(cu
 
 %% Remoção do Sistema --------------------------------
 
+test(1):- addUtente(2,dan,[12,20],braga).
+test(2):- addPrestador(2,mig,[pediatria,obstetricia],hospitalBraga).
+test(3):- addCuidado(2,marco,2,nulo,texto,nuloInterdito).
 
 utente(1, daniel, nuloInterdito, nuloInterdito).
 prestador(1, miguel, nulo, nulo).
