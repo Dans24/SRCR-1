@@ -25,11 +25,29 @@ nulo(nuloInterdito).
                                             verdadeiro
                                         ) % Idade é um inteiro positivo ou é um nulo.
                                       ).
-%% Um utente não pode ser removido se ouver consultas com ele
+
+-utente(IdUt, Nome, Idade, Morada) :: (
+                                        ou(
+                                          nao(nuloInterdito(Idade)) ,
+                                          utente(IdUt, _, nuloInterdito, _),
+                                          verdadeiro
+                                        )
+).
+%% Uma entrada de utente so pode ser removida se:
+%%%  -não existir utentes
+%%%  -existirem mais do que uma entrada com o mesmo id 
 -utente(IdUt, Nome, Idade, Morada) :: (
                                         findall(IdCuid, cuidado(IdCuid,_,IdUt,_,_,_),L1),
-                                        comprimento(L1, 0)
+                                        findall(IdU, utente(IdUt, _, _, _),L2),
+                                        comprimento(L2, X),
+                                        ou(
+                                            comprimento(L1, 0),
+                                            X > 0 ,
+                                            verdadeiro
+                                        )                                       
                                       ).
+                                      
+
 %% Exceções de utente
 % O nome do utente pode ser nulo
 excecao(utente(IdUt, Nome, Idade, Morada)) :- utente(IdUt, nulo, Idade, Morada).
@@ -175,7 +193,8 @@ addCuidado(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)):- evolucao(cu
 test(1):- addUtente(2,dan,[12,20],braga).
 test(2):- addPrestador(2,mig,[pediatria,obstetricia],hospitalBraga).
 test(3):- addCuidado(2,marco,2,nulo,texto,nuloInterdito).
-
+test(4):- atualizacao(utente(2,dan,nuloIncerto,braga),utente(2,dan,20,braga)).
+test(5):- atualizacao(utente(1, daniel, nuloInterdito, nuloInterdito),utente(1, marcoDantas, nuloInterdito, nuloInterdito)).
 utente(1, daniel, nuloInterdito, nuloInterdito).
 prestador(1, miguel, nulo, nulo).
 cuidado(1, 1, nulo, nulo).

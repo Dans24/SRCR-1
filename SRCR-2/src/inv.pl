@@ -11,6 +11,17 @@ involucao(T) :- findall(Invariante, -T :: Invariante, Lista),
 insercao(T) :- assert(T).
 insercao(T) :- retract(T),!,fail.
 
+
+
+atualizacao(Tantigo, Tnovo) :- findall(Invariante, +Tnovo :: Invariante, Lista),
+                               findall(Invariantes, -Tantigo :: Invariantes, Listas),
+                               insercao(Tantigo,Tnovo),
+                               teste(Listas),
+                               teste(Lista).
+
+insercao(Tantigo,Tnovo) :- assert(Tnovo),retract(Tantigo).
+insercao(Tantigo,Tnovo) :- assert(Tantigo),retract(Tnovo),!,fail.
+
 teste([]).
 teste([I|T]) :- I,teste(T).
 
