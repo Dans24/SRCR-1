@@ -17,7 +17,7 @@ nulo(nuloInterdito).
 %% Invariantes de Utente
 %% A idade de um utente só pode ser nula ou um inteiro positivo
 +utente(IdUt, Nome, Idade, Morada) :: (
-                                        findall(IdUt, utente(IdUt, Nome, Idade, Morada), L1),
+                                        findall(IdUt, utente(IdUt, _, _, _), L1),
                                         comprimento(L1, 1), % Não pode haver repetidos
                                         ou( 
                                             e( integer(Idade), Idade >= 0, verdadeiro), 
@@ -45,16 +45,16 @@ excecao(utente(IdUt, Nome, Idade, Morada)) :- utente(IdUt, Nome, Idade, nuloInte
 excecao(utente(IdUt, Nome, Idade, Morada)) :- utente(IdUt, Nome, Idade, nulo).
 
 
-%recursividade feita em primeiro para não fazer asserts caso algum invariante falhe.  
+%recursividade feita em primeiro para não fazer asserts caso algum invariante falhe.
 %Gera exceções de incertezas para utentes e Nomes
 genUtNomeExcecoes(Id,[]).
-genUtNomeExcecoes(Id,[X|T]):- genUtNomeExcecoes(Id,T) ,assert(excecao(utente(Id, X, _, _))).
+genUtNomeExcecoes(Id,[X|T]):- genUtNomeExcecoes(Id,T) ,evolucao(excecao(utente(Id, X, _, _))).
 %Gera exceções de incertezas para utentes e Idades
 genUtIdadeExcecoes(Id,[]).
-genUtIdadeExcecoes(Id,[X|T]):- genUtIdadeExcecoes(Id,T) ,assert(excecao(utente(Id, _, X, _))).
+genUtIdadeExcecoes(Id,[X|T]):- genUtIdadeExcecoes(Id,T) ,evolucao(excecao(utente(Id, _, X, _))).
 %Gera exceções de incertezas para utentes e Moradas
 genUtMoradaExcecoes(Id,[]).
-genUtMoradaExcecoes(Id,[X|T]):- genUtMoradaExcecoes(Id,T) ,assert(excecao(utente(IdUt, _, _, X))).
+genUtMoradaExcecoes(Id,[X|T]):- genUtMoradaExcecoes(Id,T) ,evolucao(excecao(utente(IdUt, _, _, X))).
 
 %%%--------------------------------------------------------------------------------------------------
 
@@ -67,7 +67,7 @@ genUtMoradaExcecoes(Id,[X|T]):- genUtMoradaExcecoes(Id,T) ,assert(excecao(utente
 
 %% Invariantes de Prestador
 +prestador(IdPrest, Nome, Especialidade, Instituicao) :: (
-                                                            findall(IdUt, prestador(IdPrest, Nome, Especialidade, Instituicao), L1),
+                                                            findall(IdUt, prestador(IdPrest, _, _, _), L1),
                                                             comprimento(L1, 1) % Não pode haver repetidos
                                                          ).
 -prestador(IdPrest, Nome, Especialidade, Instituicao) :: (
