@@ -3,14 +3,13 @@
 nuloInterdito(nuloInterdito).
 nuloIncerto(nuloIncerto).
 nulo(nulo).
-nulo([H|T]).
 nulo(nuloInterdito).
 
 nuloGenerico(nulo).
 nuloGenerico(nuloInterdito).
 
 :- dynamic excecao/1.
-
+isListWithElems([X|T]).
 % UTENTE--------------------------------------------------------------------------------------------
 % utente(#IdUt, Nome, Idade, Morada)
 :- dynamic utente/4.
@@ -25,7 +24,7 @@ nuloGenerico(nuloInterdito).
                                         comprimento(L1, 1), % Não pode haver repetidos
                                         ou( 
                                             e( integer(Idade), Idade >= 0, verdadeiro), 
-                                            nulo(Idade), 
+                                            isListWithElems(Idade), 
                                             verdadeiro
                                         ) % Idade é um inteiro positivo ou é um nulo.
                                       ).
