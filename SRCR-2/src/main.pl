@@ -29,6 +29,7 @@ nuloGenerico(nuloInterdito).
                                             verdadeiro
                                         ) % Idade é um inteiro positivo ou é um nulo.
                                       ).
+
 +utente(IdUt, Nome, Idade, Morada) :: nao(nulo(IdUt)).
 
 -utente(IdUt, Nome, Idade, Morada) :: nao(nuloInterdito(Idade)).
@@ -126,11 +127,11 @@ excecao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)) :- cuidado(IdCui
 % Manipulacao da Base de Conhecimento----------------------------------------------------------------
 
 %% Inserção no Sistema --------------------------------------
-addUtente(Id,N,I,M):-evolucao(utente(Id,N,I,M)).
+addUtente(IdUt, Nome, Idade, Morada) :- evolucao(utente(IdUt, Nome, Idade, Morada)).
 % Adiciona Prestador ao sistema
-addPrestador(prestador(IdPrest, Nome, Especialidade, Instituicao)):- evolucao(prestador(IdPrest, Nome, Especialidade, Instituicao)).
+addPrestador(IdPrest, Nome, Especialidade, Instituicao) :- evolucao(prestador(IdPrest, Nome, Especialidade, Instituicao)).
 % Adiciona Cuidados ao Sistema
-addCuidado(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)):- evolucao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)).
+addCuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :- evolucao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)).
 
 contem(M, M).
 contem(M, [M|T]).
