@@ -25,14 +25,12 @@ nulo(nuloInterdito).
                                             verdadeiro
                                         ) % Idade é um inteiro positivo ou é um nulo.
                                       ).
++utente(IdUt, Nome, Idade, Morada) :: nao(nulo(IdUt)).
 
--utente(IdUt, Nome, Idade, Morada) :: (
-                                        ou(
-                                          nao(nuloInterdito(Idade)) ,
-                                          utente(IdUt, _, nuloInterdito, _),
-                                          verdadeiro
-                                        )
-).
+-utente(IdUt, Nome, Idade, Morada) :: nao(nuloInterdito(Idade)).
+-utente(IdUt, Nome, Idade, Morada) :: nao(nuloInterdito(Nome)).
+-utente(IdUt, Nome, Idade, Morada) :: nao(nuloInterdito(Morada)).
+
 %% Uma entrada de utente so pode ser removida se:
 %%%  -não existir utentes
 %%%  -existirem mais do que uma entrada com o mesmo id 
@@ -42,7 +40,12 @@ nulo(nuloInterdito).
                                       ).
 
 %% Invariante de atualização
-update(utente(IdUt,Nome,nuloInterdito,Morada)) :: utente(IdUt, _, nuloInterdito, _).
+%% Termo antigo, teste no novo
+% update(Tantigo) :: Invariante.
+update(utente(IdUt,nuloInterdito, _, _))  :: utente(IdUt, nuloInterdito, _, _).
+update(utente(IdUt, _, nuloInterdito, _)) :: utente(IdUt, _, nuloInterdito, _).
+update(utente(IdUt, _, _, nuloInterdito)) :: utente(IdUt, _, _, nuloInterdito).
+
 
 %% Exceções de utente
 % O nome do utente pode ser nulo
@@ -65,6 +68,9 @@ genUtNomeExcecoes(Id,[]).
 genUtNomeExcecoes(Id,[X|T]):- genUtNomeExcecoes(Id,T) ,evolucao(excecao(utente(Id, X, _, _))).
 %Gera exceções de incertezas para utentes e Idades
 genUtIdadeExcecoes(Id,[]).
+genUtIdadeExcecoes(Id,[range(X,Y)|T]):- genUtIdadeExcecoes(Id,T) ,evolucao(
+                                                                            (excecao(utente(Id, _, Z, _)):- Z=<Y,Z>=X)
+                                                                          ).
 genUtIdadeExcecoes(Id,[X|T]):- genUtIdadeExcecoes(Id,T) ,evolucao(excecao(utente(Id, _, X, _))).
 %Gera exceções de incertezas para utentes e Moradas
 genUtMoradaExcecoes(Id,[]).
@@ -84,10 +90,23 @@ genUtMoradaExcecoes(Id,[X|T]):- genUtMoradaExcecoes(Id,T) ,evolucao(excecao(uten
                                                             findall(IdUt, prestador(IdPrest, _, _, _), L1),
                                                             comprimento(L1, 1) % Não pode haver repetidos
                                                          ).
+
++prestador(IdPrest, Nome, Especialidade, Instituicao) :: nao(nulo(IdPrest)).
+  
 -prestador(IdPrest, Nome, Especialidade, Instituicao) :: (
                                                             findall(IdCuid, cuidado(IdCuid,_,_,IdPrest,_,_),L1),
                                                             comprimento(L1, 0)
                                                          ).
+
+-prestador(IdPrest, Nome, Especialidade, Instituicao) :: nao(nuloIntedito(Nome)).
+-prestador(IdPrest, Nome, Especialidade, Instituicao) :: nao(nuloIntedito(Especialidade)).
+-prestador(IdPrest, Nome, Especialidade, Instituicao) :: nao(nuloIntedito(Instituicao)).
+
+update(prestador(IdPrest, nuloIntedito, _, _))  :: nao(prestador(IdPrest, nuloInterdito,_,_)).
+update(prestador(IdPrest, _, nuloIntedito, _))  :: nao(prestador(IdPrest, _,nuloInterdito,_)).
+update(prestador(IdPrest, _, _, nuloInterdito)) :: nao(prestador(IdPrest, _,_,nuloInterdito)).
+
+ 
 %% Excecoes de Prestador 
 % O nome do prestador pode ser nulo
 excecao(prestador(IdPrest, Nome, Especialidade, Instituicao)) :- prestador(IdPrest, nulo, Especialidade2, Instituicao2).
@@ -117,11 +136,22 @@ genPresInstituicaoExcecoes(Id,[X|T]):- genPresInstituicaoExcecoes(Id,T) ,evoluca
 % cuidado(#IdUt, #IdPrest, Descricao, Custo)
 :- dynamic cuidado/6.
 
+%% Invariantes de Cuidados 
++cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nulo(IdUt)).
+
 -cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :- nao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)),
                                              nao(excecao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo))).
 
-%% Invariantes de Cuidados 
+-cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nuloInterdito(Data)).
+-cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nuloInterdito(IdUt)).
+-cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nuloInterdito(IdPrest)).
+-cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nuloInterdito(Descricao)).
+-cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nuloInterdito(Custo)).
 
+update(cuidado(IdCuid, _, nuloIntedito, _, _, _))  :: cuidado(IdCuid, _, nuloIntedito, _, _, _).
+update(cuidado(IdCuid, _, _, nuloIntedito, _, _))  :: cuidado(IdCuid, _, _, nuloInterdito, _, _).
+update(cuidado(IdCuid, _, _, _, nuloIntedito, _))  :: cuidado(IdCuid, _, _, _, nuloInterdito, _).
+update(cuidado(IdCuid, _, _, _, _, nuloIntedito))  :: cuidado(IdCuid, _, _, _, _, nuloInterdito).
 
 
 %% Excecoes de Cuidado
@@ -184,9 +214,11 @@ addCuidado(cuidado(IdCuid, Data, IdUt, [X|T], Descricao, Custo)):- addCuidado(cu
 addCuidado(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, [X|T])):- addCuidado(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, nuloIncerto)), genCuidadoCustoExcec(IdCuid,[X|T]).
 addCuidado(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)):- evolucao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)).
 
-%% Remoção do Sistema --------------------------------
 
-test(1):- addUtente(2,dan,[12,20],braga).
+%% Remoção do Sistema --------------------------------
+%atualizacao(utente(2,[dan],[12,20],braga), utente(2,maria,[12,20],braga)).
+
+test(1):- addUtente(2,[dan],[range(12,20)],braga).
 test(2):- addPrestador(2,mig,[pediatria,obstetricia],hospitalBraga).
 test(3):- addCuidado(2,marco,2,nulo,texto,nuloInterdito).
 test(4):- atualizacao(utente(2,dan,nuloIncerto,braga),utente(2,dan,20,braga)).

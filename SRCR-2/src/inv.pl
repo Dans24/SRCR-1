@@ -13,7 +13,8 @@ insercao(T) :- retract(T),!,fail.
 
 
 
-atualizacao(Tantigo, Tnovo) :- findall(Invariante, +Tnovo :: Invariante, Lista),
+atualizacao(Tantigo, Tnovo) :- Tantigo,
+                               findall(Invariante, +Tnovo :: Invariante, Lista),
                                findall(Invariantes, update(Tantigo) :: Invariantes, Listas),
                                insercao(Tantigo,Tnovo),
                                teste(Listas),
