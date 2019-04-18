@@ -38,11 +38,11 @@ excecao(utente(IdUt, Nome, Idade, Morada)) :- utente(IdUt, nuloInterdito, Idade,
 % A idade do utente pode ser nulo
 excecao(utente(IdUt, Nome, Idade, Morada)) :- utente(IdUt, Nome, nulo, Morada).
 % A idade do utente pode ser nulo interdito
+excecao(utente(IdUt, Nome, Idade, Morada)) :- utente(IdUt, Nome, nuloInterdito, Morada).
+% A idade do utente pode ser nulo interdito
 excecao(utente(IdUt, Nome, Idade, Morada)) :- utente(IdUt, Nome, Idade, nuloInterdito).
 % A morada do utente pode ser nulo
 excecao(utente(IdUt, Nome, Idade, Morada)) :- utente(IdUt, Nome, Idade, nulo).
-% A morada do utente pode ser nulo interdito
-excecao(utente(IdUt, Nome, Idade, Morada)) :- utente(IdUt, Nome, Idade, nuloInterdito).
 
 
 %recursividade feita em primeiro para não fazer asserts caso algum invariante falhe.  
@@ -90,13 +90,13 @@ excecao(prestador(IdPrest, Nome, Especialidade, Instituicao)) :- prestador(IdPre
 
 %Gera exceções de incertezas para prestadores e Nomes
 genPresNomeExcecoes(Id,[]).
-genPresNomeExcecoes(Id,[X|T]):- genPresNomeExcecoes(Id,T) ,assert(excecao(prestador(Id, X, _, _))).
+genPresNomeExcecoes(Id,[X|T]):- genPresNomeExcecoes(Id,T) ,evolucao(excecao(prestador(Id, X, _, _))).
 %Gera exceções de incertezas para Prestadores e especialidades
 genPresEspecialidadeExcecoes(Id,[]).
-genPresEspecialidadeExcecoes(Id,[X|T]):- genPresEspecialidadeExcecoes(Id,T) ,assert(excecao(prestador(Id, _, X, _))).
+genPresEspecialidadeExcecoes(Id,[X|T]):- genPresEspecialidadeExcecoes(Id,T) ,evolucao(excecao(prestador(Id, _, X, _))).
 %Gera exceções de incertezas para prestadores e Instituições
 genPresInstituicaoExcecoes(Id,[]).
-genPresInstituicaoExcecoes(Id,[X|T]):- genPresInstituicaoExcecoes(Id,T) ,assert(excecao(prestador(Id, _, _, X))).
+genPresInstituicaoExcecoes(Id,[X|T]):- genPresInstituicaoExcecoes(Id,T) ,evolucao(excecao(prestador(Id, _, _, X))).
 %%%--------------------------------------------------------------------------------------------------
 
 % CUIDADO--------------------------------------------------------------------------------------------
@@ -134,16 +134,16 @@ excecao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)) :- cuidado(IdCui
 
 %Gera exceções de incertezas para consultas de Datas
 genCuidadoDataExcec(IdCuid,[]).
-genCuidadoDataExcec(IdCuid,[X|T]) :- genCuidadoDataExcec(IdCuid,T), assert(excecao(cuidado(IdCuid, X, _, _, _, _))).
+genCuidadoDataExcec(IdCuid,[X|T]) :- genCuidadoDataExcec(IdCuid,T), evolucao(excecao(cuidado(IdCuid, X, _, _, _, _))).
 %Gera exceções de incertezas para consultas de Utentes
 genCuidadoUtExcec(IdCuid,[]).
-genCuidadoUtExcec(IdCuid,[X|T]) :- genCuidadoUtExcec(IdCuid,T), assert(excecao(cuidado(IdCuid, _, X, _, _, _))).
+genCuidadoUtExcec(IdCuid,[X|T]) :- genCuidadoUtExcec(IdCuid,T), evolucao(excecao(cuidado(IdCuid, _, X, _, _, _))).
 %Gera exceções de incertezas para consultas de Prestadores
 genCuidadoPresExcec(IdCuid,[]).
-genCuidadoPresExcec(IdCuid,[X|T]) :- genCuidadoPresExcec(IdCuid,T), assert(excecao(cuidado(IdCuid, _, _, X, _, _))).
+genCuidadoPresExcec(IdCuid,[X|T]) :- genCuidadoPresExcec(IdCuid,T), evolucao(excecao(cuidado(IdCuid, _, _, X, _, _))).
 %Gera exceções de incertezas para consultas de Custos
 genCuidadoCustoExcec(IdCuid,[]).
-genCuidadoCustoExcec(IdCuid,[X|T]) :- genCuidadoCustoExcec(IdCuid,T), assert(excecao(cuidado(IdCuid, _, _, _, _, X))).
+genCuidadoCustoExcec(IdCuid,[X|T]) :- genCuidadoCustoExcec(IdCuid,T), evolucao(excecao(cuidado(IdCuid, _, _, _, _, X))).
 %%%--------------------------------------------------------------------------------------------------
 
 % Manipulacao da Base de Conhecimento----------------------------------------------------------------
@@ -178,4 +178,3 @@ test(3):- addCuidado(2,marco,2,nulo,texto,nuloInterdito).
 
 utente(1, daniel, nuloInterdito, nuloInterdito).
 prestador(1, miguel, nulo, nulo).
-cuidado(1, 1, nulo, nulo).

@@ -18,4 +18,4 @@ remocao(T) :- retract(T).
 remocao(T) :- assert(T), !, fail.
 
 comprimento([], 0).
-comprimento([H|T], R) :- comprimento(T, R1), R is R1 + 1.
+comprimento([_|T], R) :- comprimento(T, R1), R is R1 + 1.
