@@ -38,9 +38,10 @@ nulo(nuloInterdito).
 %%%  -existirem mais do que uma entrada com o mesmo id 
 -utente(IdUt, Nome, Idade, Morada) :: (
                                         findall(IdCuid, cuidado(IdCuid,_,IdUt,_,_,_),L1),
-                                        comprimento(L1, 0),
+                                        comprimento(L1, 0)
                                       ).
-                           
+
+%% Invariante de atualização
 update(utente(IdUt,Nome,nuloInterdito,Morada)) :: utente(IdUt, _, nuloInterdito, _).
 
 %% Exceções de utente
