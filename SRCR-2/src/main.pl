@@ -53,9 +53,12 @@ update(utente(IdUt, _, _, nuloInterdito)) :: utente(IdUt, _, _, nuloInterdito).
 
 %% Exceções de utente
 excecao(utente(IdUt,Nome,Idade, Morada)) :- utente(IdUt, ListaDeNome, ListaDeIdade, ListaDeMorada),
-                                            ou(contem(Nome, ListaDeNome), nuloGenerico(ListaDeNome), verdadeiro),
-                                            ou(contem(Idade, ListaDeIdade), nuloGenerico(ListaDeIdade), verdadeiro),
+                                            ou(contem(Nome, ListaDeNome), nuloGenerico(ListaDeNome), verdadeiro).
+excecao(utente(IdUt,Nome,Idade, Morada)) :- utente(IdUt, ListaDeNome, ListaDeIdade, ListaDeMorada),
+                                            ou(contem(Idade, ListaDeIdade), nuloGenerico(ListaDeIdade), verdadeiro).
+excecao(utente(IdUt,Nome,Idade, Morada)) :- utente(IdUt, ListaDeNome, ListaDeIdade, ListaDeMorada),
                                             ou(contem(Morada, ListaDeMorada), nuloGenerico(ListaDeMorada), verdadeiro).
+
 
 % PRESTADOR------------------------------------------------------------------------------------------
 % prestador(#IdPrest, Nome, Especialidade, Instituicao)
@@ -89,10 +92,11 @@ update(prestador(IdPrest, _, _, nuloInterdito)) :: nao(prestador(IdPrest, _,_,nu
 %% Excecoes de Prestador 
 
 excecao(prestador(IdPrest, Nome, Especialidade, Instituicao)) :- prestador(IdPrest, ListaDeNome, ListaDeEspecialidade, ListaDeInstituicao),
-                                                                 ou(contem(Nome, ListaDeNome), nuloGenerico(ListaDeNome),verdadeiro),
-                                                                 ou(contem(Especialidade, ListaDeEspecialidade), nuloGenerico(ListaDeEspecialidade),verdadeiro),
                                                                  ou(contem(Instituicao, ListaDeInstituicao), nuloGenerico(ListaDeInstituicao),verdadeiro).
-
+excecao(prestador(IdPrest, Nome, Especialidade, Instituicao)) :- prestador(IdPrest, ListaDeNome, ListaDeEspecialidade, ListaDeInstituicao),
+                                                                 ou(contem(Especialidade, ListaDeEspecialidade), nuloGenerico(ListaDeEspecialidade),verdadeiro).
+excecao(prestador(IdPrest, Nome, Especialidade, Instituicao)) :- prestador(IdPrest, ListaDeNome, ListaDeEspecialidade, ListaDeInstituicao),
+                                                                 ou(contem(Instituicao, ListaDeInstituicao), nuloGenerico(ListaDeInstituicao),verdadeiro).
 
 % CUIDADO--------------------------------------------------------------------------------------------
 % cuidado(#IdUt, #IdPrest, Descricao, Custo)
@@ -118,12 +122,13 @@ update(cuidado(IdCuid, _, _, _, _, nuloIntedito))  :: cuidado(IdCuid, _, _, _, _
 
 %% Excecoes de Cuidado
 excecao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)) :- cuidado(IdCuid, ListaDeData, ListaDeIdUt, ListaDeIdPrest, ListaDeDescricao, ListaDeCusto),
-                                            ou(contem(Data, ListaDeData), nuloGenerico(ListaDeData), verdadeiro),
-                                            ou(contem(IdUt, ListaDeIdUt), nuloGenerico(ListaDeIdUt), verdadeiro),
-                                            ou(contem(IdPrest, ListaDeIdPrest), nuloGenerico(ListaDePrest), verdadeiro),
-                                            ou(contem(Descricao, ListaDeDescricao), nuloGenerico(ListaDeDescricao), verdadeiro),
-                                            ou(contem(Custo, ListaDeCusto), nuloGenerico(ListaDeCusto), verdadeiro).
-
+                                                                    ou(contem(Data, ListaDeData), nuloGenerico(ListaDeData), verdadeiro).
+excecao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)) :- cuidado(IdCuid, ListaDeData, ListaDeIdUt, ListaDeIdPrest, ListaDeDescricao, ListaDeCusto),
+                                                                    ou(contem(IdUt, ListaDeIdUt), nuloGenerico(ListaDeIdUt), verdadeiro).
+excecao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)) :- cuidado(IdCuid, ListaDeData, ListaDeIdUt, ListaDeIdPrest, ListaDeDescricao, ListaDeCusto),
+                                                                    ou(contem(IdPrest, ListaDeIdPrest), nuloGenerico(ListaDePrest), verdadeiro).
+excecao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)) :- cuidado(IdCuid, ListaDeData, ListaDeIdUt, ListaDeIdPrest, ListaDeDescricao, ListaDeCusto),
+                                                                    ou(contem(Custo, ListaDeCusto), nuloGenerico(ListaDeCusto), verdadeiro).
 % Manipulacao da Base de Conhecimento----------------------------------------------------------------
 
 %% Inserção no Sistema --------------------------------------
@@ -133,9 +138,8 @@ addPrestador(IdPrest, Nome, Especialidade, Instituicao) :- evolucao(prestador(Id
 % Adiciona Cuidados ao Sistema
 addCuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :- evolucao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)).
 
-contem(M, M).
 contem(M, [M|T]).
-contem(M, [range(L, H)|T]) :- M >= L, M =< H.
+contem(M, [(range(L,H))|T]) :- M >= L, M =< H..
 contem(M, [_|T]) :- contem(M, T).
 
 %% Remoção do Sistema --------------------------------
