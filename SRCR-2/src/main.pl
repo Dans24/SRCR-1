@@ -50,6 +50,7 @@ nuloGenerico(nuloInterdito).
 update(utente(IdUt,nuloInterdito, _, _))  :: utente(IdUt, nuloInterdito, _, _).
 update(utente(IdUt, _, nuloInterdito, _)) :: utente(IdUt, _, nuloInterdito, _).
 update(utente(IdUt, _, _, nuloInterdito)) :: utente(IdUt, _, _, nuloInterdito).
+update(utente(IdUt, _, _, _)) :: utente(IdUt, _, _, _).
 
 %% Exceções de utente
 excecao(utente(IdUt,Nome,Idade, Morada)) :- utente(IdUt, ListaDeNome, ListaDeIdade, ListaDeMorada),
@@ -81,9 +82,11 @@ excecao(utente(IdUt,Nome,Idade, Morada)) :- utente(IdUt, ListaDeNome, ListaDeIda
 -prestador(IdPrest, Nome, Especialidade, Instituicao) :: nao(nuloIntedito(Especialidade)).
 -prestador(IdPrest, Nome, Especialidade, Instituicao) :: nao(nuloIntedito(Instituicao)).
 
-update(prestador(IdPrest, nuloIntedito, _, _))  :: nao(prestador(IdPrest, nuloInterdito,_,_)).
-update(prestador(IdPrest, _, nuloIntedito, _))  :: nao(prestador(IdPrest, _,nuloInterdito,_)).
-update(prestador(IdPrest, _, _, nuloInterdito)) :: nao(prestador(IdPrest, _,_,nuloInterdito)).
+update(prestador(IdPrest, nuloIntedito, _, _))  :: prestador(IdPrest, nuloInterdito,_,_).
+update(prestador(IdPrest, _, nuloIntedito, _))  :: prestador(IdPrest, _,nuloInterdito,_).
+update(prestador(IdPrest, _, _, nuloInterdito)) :: prestador(IdPrest, _,_,nuloInterdito).
+update(prestador(IdPrest, _, _, _)) :: prestador(IdPrest, _,_,_).
+
 
  
 %% Excecoes de Prestador 
@@ -114,6 +117,8 @@ update(cuidado(IdCuid, _, nuloIntedito, _, _, _))  :: cuidado(IdCuid, _, nuloInt
 update(cuidado(IdCuid, _, _, nuloIntedito, _, _))  :: cuidado(IdCuid, _, _, nuloInterdito, _, _).
 update(cuidado(IdCuid, _, _, _, nuloIntedito, _))  :: cuidado(IdCuid, _, _, _, nuloInterdito, _).
 update(cuidado(IdCuid, _, _, _, _, nuloIntedito))  :: cuidado(IdCuid, _, _, _, _, nuloInterdito).
+update(cuidado(IdCuid, _, _, _, _, _))  :: cuidado(IdCuid, _, _, _, _, _).
+
 
 
 %% Excecoes de Cuidado
