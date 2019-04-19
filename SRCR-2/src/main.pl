@@ -139,7 +139,7 @@ addPrestador(IdPrest, Nome, Especialidade, Instituicao) :- evolucao(prestador(Id
 addCuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :- evolucao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)).
 
 contem(M, [M|T]).
-contem(M, [(range(L,H))|T]) :- M >= L, M =< H..
+contem(M, [(range(L,H))|T]) :- M >= L, M =< H.
 contem(M, [_|T]) :- contem(M, T).
 
 %% Remoção do Sistema --------------------------------
