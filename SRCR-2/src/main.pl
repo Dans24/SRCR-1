@@ -90,7 +90,6 @@ update(prestador(IdPrest, _, _, _)) :: prestador(IdPrest, _,_,_).
 
  
 %% Excecoes de Prestador 
-
 excecao(prestador(IdPrest, Nome, Especialidade, Instituicao)) :- prestador(IdPrest, ListaDeNome, ListaDeEspecialidade, ListaDeInstituicao),
                                                                  ou(contem(Nome, ListaDeNome), nuloGenerico(ListaDeNome),verdadeiro),
                                                                  ou(contem(Especialidade, ListaDeEspecialidade), nuloGenerico(ListaDeEspecialidade),verdadeiro),
@@ -101,11 +100,12 @@ excecao(prestador(IdPrest, Nome, Especialidade, Instituicao)) :- prestador(IdPre
 % cuidado(#IdUt, #IdPrest, Descricao, Custo)
 :- dynamic cuidado/6.
 
-%% Invariantes de Cuidados 
-+cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nulo(IdUt)).
-
 -cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :- nao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)),
                                              nao(excecao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo))).
+
+%% Invariantes de Cuidados 
++cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nulo(IdUt)).
++cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nulo(Descricao)).
 
 -cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nuloInterdito(Data)).
 -cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nuloInterdito(IdUt)).
@@ -137,6 +137,22 @@ addUtente(IdUt, Nome, Idade, Morada) :- evolucao(utente(IdUt, Nome, Idade, Morad
 addPrestador(IdPrest, Nome, Especialidade, Instituicao) :- evolucao(prestador(IdPrest, Nome, Especialidade, Instituicao)).
 % Adiciona Cuidados ao Sistema
 addCuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :- evolucao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)).
+
+alterUserNome(IdUt,Nome):- utente(IdUt,N,I,M), atualizacao(utente(IdUt,N,I,M), utente(IdUt,Nome,I,M)).
+alterUserIdade(IdUt,Idade):- utente(IdUt,N,I,M), atualizacao(utente(IdUt,N,I,M), utente(IdUt,N,Idade,M)).
+alterUserMorada(IdUt,Morada):- utente(IdUt,N,I,M), atualizacao(utente(IdUt,N,I,M), utente(IdUt,N,I,Morada)).
+
+alterPrestadorNome(IdPrest,Nome):- prestador(IdPrest, N, E, I), atualizacao(prestador(IdPrest, N, E, I),prestador(IdPrest, Nome, E, I)).
+alterPrestadorEspecialidade(IdPrest,Esp):- prestador(IdPrest, N, E, I), atualizacao(prestador(IdPrest, N, E, I),prestador(IdPrest, N, Esp, I)).
+alterPrestadorInstituicao(IdPrest,Inst):- prestador(IdPrest, N, E, I), atualizacao(prestador(IdPrest, N, E, I),prestador(IdPrest, N, E, Inst)).
+
+alterCuidadoData(IdCuid,Data) :- cuidado(IdCuid, D, IU, IP, De, C), atualizacao(cuidado(IdCuid, D, IU, IP, De, C),cuidado(IdCuid, Data, IU, IP, De, C)).
+alterCuidadoUtente(IdCuid,Ut) :- cuidado(IdCuid, D, IU, IP, De, C), atualizacao(cuidado(IdCuid, D, IU, IP, De, C),cuidado(IdCuid, D, Ut, IP, De, C)).
+alterCuidadoPrest(IdCuid,Pret) :- cuidado(IdCuid, D, IU, IP, De, C), atualizacao(cuidado(IdCuid, D, IU, IP, De, C),cuidado(IdCuid, D, IU, Pret, De, C)).
+alterCuidadoDesc(IdCuid,Desc) :- cuidado(IdCuid, D, IU, IP, De, C), atualizacao(cuidado(IdCuid, D, IU, IP, De, C),cuidado(IdCuid, D, IU, IP, Desc, C)).
+alterCuidadoCust(IdCuid,Custo) :- cuidado(IdCuid, D, IU, IP, De, C), atualizacao(cuidado(IdCuid, D, IU, IP, De, C),cuidado(IdCuid, D, IU, IP, De, Custo)).
+% não se pode adicionar conhecimento negativo que seja verdade.
++(-T)::nao(T).
 
 contem(M, M).
 contem(M, [M|T]).
