@@ -216,28 +216,57 @@ contem(X, [X|T]).
 contem(X, [(range(L, H))|T]) :- X >= L, X =< H.
 contem(X, [_|T]) :- contem(X, T).
 
-%Cálculo da quantidade de gastos de um utente.
+% Contém que retorna se é uma lista ou não
+%contem(X, X, Custo, R) :- makeList(1,Custo,R).
+%contem(X, [X|T], Custo, R) :- makeList(2,Custo,R).
+%contem(X, [(range(L, H))|T], Custo, R) :- X >= L, X =< H, makeList(2,Custo,R).
+%contem(X, [_|T], Custo, R) :- contem(X, T, Custo ,R).
+
+contem(X, X, 1).
+contem(X, [X|T], 2).
+contem(X, [(range(L, H))|T], 2).
+contem(X, [_|T], R) :- contem(X, T, R).
+
+makeList(2, [H|T], [H|T]).
+makeList(2, Custo, [Custo]).
+makeList(_, Custo, Custo).  
+
+%Cálculo da quantidade de gastos/lucros.
+
+gastosTotaisUtente(IdUt, CC, II, IS) :- findall((1,C), cuidado(_, _, IdUt, _, _, C), L), soma(L,CC,II,IS).
+
+lucroTotalInstituicao(Instituicao, CC, II, IS) :- findall((Type,C), (cuidado(_, _, _, IdPrest, _, C), prestador(IdPrest, _, _, X), 
+                                                  contem(Instituicao, X, Type)), L), soma(L,CC,II,IS).
+
+lucroTotalEspecialidade(Especialidade, CC, II, IS) :- findall((Type,C), (cuidado(_, _, _, IdPrest, _, C), prestador(IdPrest, _, X, _), 
+                                                  contem(Especialidade, X, Type)), L), soma(L,CC,II,IS).
+
+lucroTotalData(Data, CC, II, IS) :- findall((Type,C), (cuidado(_, X, _, _, _, C), contem(Data,X,Type)), L), soma(L,CC,II,IS).
+
+
+%Funcao auxiliar de somar
 % CC -> CustoCerto -- quanto paga de certeza
 % II -> IncertezaInferior -- valor minimo que é incerto pagar
 % IS -> IncertezaSuperior -- valor máximo que é incerto pagar
-gastosTotaisCliente(IdUt, CC, II, IS) :- findall(C, consulta(_, _, IdUt, _, _, C), L), soma(L,CC,II,IS).
-
 
 soma([], 0, 0, 0).
-soma([[H|T1]|T2], Total, IITotal, ISTotal) :- soma(T2, Total, RestoI, RestoS), somaI([H|T1], AuxI, AuxS), 
+soma([(_,[H|T1])|T2], Total, IITotal, ISTotal) :- soma(T2, Total, RestoI, RestoS), somaAux([H|T1], AuxI, AuxS), 
                                                                                IITotal is RestoI + AuxI, 
-                                                                               ISTotal is RestoS + AuxS.  
-soma([H|T], Total, II, IS) :- soma(T, Resto, II, IS), Total is H + Resto.
+                                                                               ISTotal is RestoS + AuxS. 
+soma([(_,H)|T], Total, II, IS) :- H == nuloInterdito, soma(T, Total, II, IS).                                                                                
+soma([(1,H)|T], Total, II, IS) :- H \= nuloInterdito, soma(T, Resto, II, IS), Total is H + Resto.
+soma([(2,H)|T], Total, TotalI, TotalS) :- H \= nuloInterdito, soma(T, Total, RestoI, RestoS), TotalI is RestoI + H, TotalS is RestoS + H.
 
-somaI([], 0, 0).
-somaI([(range(X, Y))|T], IITotal, ISTotal) :- somaI(T, RestoI, RestoS), IITotal is RestoI + X, ISTotal is RestoS + Y.
-somaI([H|T], IITotal, ISTotal) :- somaI(T, RestoI, RestoS), IITotal is RestoI + H, ISTotal is RestoS + H.
+somaAux([], 0, 0).
+somaAux([(range(X, Y))|T], IITotal, ISTotal) :- somaAux(T, RestoI, RestoS), IITotal is RestoI + X, ISTotal is RestoS + Y.
+somaAux([H|T], IITotal, ISTotal) :- somaAux(T, RestoI, RestoS), IITotal is RestoI + H, ISTotal is RestoS + H.
 
 %% Remoção do Sistema --------------------------------
 utente(4,[jorge,manuel],[12,13],aveiro).
 
 test(1):- addUtentePos(2,[dan,mig],[range(12,20)],braga).
 test(2):- addPrestadorPos(2,mig,[pediatria,obstetricia],hospitalBraga).
-test(3):- addCuidadoPos(2,[data(3, 1, 2019), data(3, 1, 2019)], 2, nulo, texto, nuloInterdito).
+test(3):- addCuidadoPos(1,22/10/2000,2,2,sdf,[range(30,50)]), addCuidadoPos(2,22/10/2000,2,2,sdf,20).
+test(4):- addCuidadoPos(3,[data(3, 1, 2019), data(3, 1, 2019)], 2, nulo, texto, nuloInterdito).
 % test(4):- atualizacao(utente(2,dan,[14],braga), utente(2,dan,20,braga)).
 % test(5):- atualizacao(utente(1, daniel, nuloInterdito, nuloInterdito), utente(1, marcoDantas, nuloInterdito, nuloInterdito)).
