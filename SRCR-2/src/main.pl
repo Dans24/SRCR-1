@@ -1,7 +1,7 @@
 ?- consult(['inv.pl','si.pl']).
 
 nuloInterdito(nuloInterdito).
-nuloIncerto(nuloIncerto).
+
 nulo(nulo).
 nulo([H|T]).
 nulo(nuloInterdito).
@@ -10,11 +10,11 @@ nuloGenerico(nulo).
 nuloGenerico(nuloInterdito).
 
 :- dynamic excecao/1.
+:- dynamic '-'/1.
 
 % UTENTE--------------------------------------------------------------------------------------------
 % utente(#IdUt, Nome, Idade, Morada)
 :- dynamic utente/4.
-
 -utente(IdUt, Nome, Idade, Morada) :- nao(utente(IdUt, Nome, Idade, Morada)),
                                       nao(excecao(utente(IdUt, Nome, Idade, Morada))).
 
@@ -53,7 +53,7 @@ update(utente(IdUt, _, _, nuloInterdito)) :: utente(IdUt, _, _, nuloInterdito).
 update(utente(IdUt, _, _, _)) :: utente(IdUt, _, _, _).
 
 %% Exceções de utente
-excecao(utente(IdUt,Nome,Idade, Morada)) :- utente(IdUt, ListaDeNome, ListaDeIdade, ListaDeMorada),
+excecao(utente(IdUt, Nome, Idade, Morada)) :- utente(IdUt, ListaDeNome, ListaDeIdade, ListaDeMorada),
                                             ou(contem(Nome, ListaDeNome), nuloGenerico(ListaDeNome), verdadeiro),
                                             ou(contem(Idade, ListaDeIdade), nuloGenerico(ListaDeIdade), verdadeiro),
                                             ou(contem(Morada, ListaDeMorada), nuloGenerico(ListaDeMorada), verdadeiro).
@@ -119,8 +119,6 @@ update(cuidado(IdCuid, _, _, _, nuloIntedito, _))  :: cuidado(IdCuid, _, _, _, n
 update(cuidado(IdCuid, _, _, _, _, nuloIntedito))  :: cuidado(IdCuid, _, _, _, _, nuloInterdito).
 update(cuidado(IdCuid, _, _, _, _, _))  :: cuidado(IdCuid, _, _, _, _, _).
 
-
-
 %% Excecoes de Cuidado
 excecao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)) :- cuidado(IdCuid, ListaDeData, ListaDeIdUt, ListaDeIdPrest, ListaDeDescricao, ListaDeCusto),
                                             ou(contem(Data, ListaDeData), nuloGenerico(ListaDeData), verdadeiro),
@@ -131,13 +129,38 @@ excecao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)) :- cuidado(IdCui
 
 % Manipulacao da Base de Conhecimento----------------------------------------------------------------
 
-%% Inserção no Sistema --------------------------------------
-addUtente(IdUt, Nome, Idade, Morada) :- evolucao(utente(IdUt, Nome, Idade, Morada)).
+%% Inserção de conhecimento positivo no Sistema --------------------------------------
+% Adiciona Utente ao sistema
+addUtentePos(IdUt, Nome, Idade, Morada) :- evolucao(utente(IdUt, Nome, Idade, Morada)).
 % Adiciona Prestador ao sistema
-addPrestador(IdPrest, Nome, Especialidade, Instituicao) :- evolucao(prestador(IdPrest, Nome, Especialidade, Instituicao)).
+addPrestadorPos(IdPrest, Nome, Especialidade, Instituicao) :- evolucao(prestador(IdPrest, Nome, Especialidade, Instituicao)).
 % Adiciona Cuidados ao Sistema
-addCuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :- evolucao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)).
+addCuidadoPos(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :- evolucao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)).
 
+%% Inserção de conhecimento negativo no Sistema --------------------------------------
+% Adiciona Utente ao sistema
+addUtenteNeg(IdUt, Nome, Idade, Morada) :- evolucao(-utente(IdUt, Nome, Idade, Morada)).
+% Adiciona Prestador ao sistema
+addPrestadorNeg(IdPrest, Nome, Especialidade, Instituicao) :- evolucao(-prestador(IdPrest, Nome, Especialidade, Instituicao)).
+% Adiciona Cuidados ao Sistema
+addCuidadoNeg(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :- evolucao(-cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)).
+
+% Não se pode adicionar conhecimento negativo que seja verdade.
++(-T) :: nao(T).
+
+% Não se pode adicionar conhecimento negativo repetido, ou seja, todas as variáveis iguais.
++(-utente(IdUt, Nome, Idade, Morada)) :: (findall(IdUt, -utente(IdUt, Nome, Idade, Morada), L),
+                                          comprimento(L,2)).
+
++(-prestador(IdPrest, Nome, Especialidade, Instituicao)) :: (findall(IdPrest, -prestador(IdPrest, Nome, Especialidade, Instituicao), L),
+                                          comprimento(L,2)).
+
++(-cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)) :: (findall(IdCuid, -cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo), L),
+                                          comprimento(L,2)).
+
+%find(-utente(IdUt, Nome, Idade, Morada),R) :- findall((IdUt, Nome, Idade, Morada), -utente(IdUt, Nome, Idade, Morada), R).
+
+%% Alteração de conhecimento positivo no Sistema --------------------------------------
 alterUserNome(IdUt,Nome):- utente(IdUt,N,I,M), atualizacao(utente(IdUt,N,I,M), utente(IdUt,Nome,I,M)).
 alterUserIdade(IdUt,Idade):- utente(IdUt,N,I,M), atualizacao(utente(IdUt,N,I,M), utente(IdUt,N,Idade,M)).
 alterUserMorada(IdUt,Morada):- utente(IdUt,N,I,M), atualizacao(utente(IdUt,N,I,M), utente(IdUt,N,I,Morada)).
@@ -151,8 +174,6 @@ alterCuidadoUtente(IdCuid,Ut) :- cuidado(IdCuid, D, IU, IP, De, C), atualizacao(
 alterCuidadoPrest(IdCuid,Pret) :- cuidado(IdCuid, D, IU, IP, De, C), atualizacao(cuidado(IdCuid, D, IU, IP, De, C),cuidado(IdCuid, D, IU, Pret, De, C)).
 alterCuidadoDesc(IdCuid,Desc) :- cuidado(IdCuid, D, IU, IP, De, C), atualizacao(cuidado(IdCuid, D, IU, IP, De, C),cuidado(IdCuid, D, IU, IP, Desc, C)).
 alterCuidadoCust(IdCuid,Custo) :- cuidado(IdCuid, D, IU, IP, De, C), atualizacao(cuidado(IdCuid, D, IU, IP, De, C),cuidado(IdCuid, D, IU, IP, De, Custo)).
-% não se pode adicionar conhecimento negativo que seja verdade.
-+(-T)::nao(T).
 
 contem(M, M).
 contem(M, [M|T]).
@@ -165,7 +186,7 @@ utente(4,[jorge,manuel],[12,13],aveiro).
 test(1):- addUtente(2,[dan,mig],[range(12,20)],braga).
 test(2):- addPrestador(2,mig,[pediatria,obstetricia],hospitalBraga).
 test(3):- addCuidado(2,marco,2,nulo,texto,nuloInterdito).
-test(4):- atualizacao(utente(2,dan,nuloIncerto,braga),utente(2,dan,20,braga)).
+test(4):- atualizacao(utente(2,dan,[14],braga),utente(2,dan,20,braga)).
 test(5):- atualizacao(utente(1, daniel, nuloInterdito, nuloInterdito),utente(1, marcoDantas, nuloInterdito, nuloInterdito)).
 utente(1, daniel, nuloInterdito, nuloInterdito).
 prestador(1, miguel, nulo, nulo).
