@@ -210,6 +210,24 @@ alterCuidadoPrest(IdCuid,Pret) :- cuidado(IdCuid, D, IU, IP, De, C), atualizacao
 alterCuidadoDesc(IdCuid,Desc) :- cuidado(IdCuid, D, IU, IP, De, C), atualizacao(cuidado(IdCuid, D, IU, IP, De, C),cuidado(IdCuid, D, IU, IP, Desc, C)).
 alterCuidadoCust(IdCuid,Custo) :- cuidado(IdCuid, D, IU, IP, De, C), atualizacao(cuidado(IdCuid, D, IU, IP, De, C),cuidado(IdCuid, D, IU, IP, De, Custo)).
 
+
+%% Remoção de conhecimento positivo no Sistema --------------------------------------
+% Remove Utente ao sistema
+removeUtentePos(IdUt, Nome, Idade, Morada) :- involucao(utente(IdUt, Nome, Idade, Morada)).
+% Remove Prestador ao sistema
+removePrestadorPos(IdPrest, Nome, Especialidade, Instituicao) :- involucao(prestador(IdPrest, Nome, Especialidade, Instituicao)).
+% Remove Cuidados ao Sistema
+removeCuidadoPos(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :- involucao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)).
+
+%% Remoção de conhecimento negativo no Sistema --------------------------------------
+% Remove Utente ao sistema
+removeUtenteNeg(IdUt, Nome, Idade, Morada) :- involucao(-utente(IdUt, Nome, Idade, Morada)).
+% Remove Prestador ao sistema
+removePrestadorNeg(IdPrest, Nome, Especialidade, Instituicao) :- involucao(-prestador(IdPrest, Nome, Especialidade, Instituicao)).
+% Remove Cuidados ao Sistema
+removeCuidadoNeg(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :- involucao(-cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)).
+
+
 contem(X, X).
 contem(X, [X|T]).
 % Contem especial para intervalos
@@ -217,11 +235,6 @@ contem(X, [(range(L, H))|T]) :- X >= L, X =< H.
 contem(X, [_|T]) :- contem(X, T).
 
 % Contém que retorna se é uma lista ou não
-%contem(X, X, Custo, R) :- makeList(1,Custo,R).
-%contem(X, [X|T], Custo, R) :- makeList(2,Custo,R).
-%contem(X, [(range(L, H))|T], Custo, R) :- X >= L, X =< H, makeList(2,Custo,R).
-%contem(X, [_|T], Custo, R) :- contem(X, T, Custo ,R).
-
 contem(X, X, 1).
 contem(X, [X|T], 2).
 contem(X, [(range(L, H))|T], 2).
