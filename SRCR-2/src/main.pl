@@ -12,6 +12,11 @@ nuloGenerico(nuloInterdito).
 :- dynamic excecao/1.
 :- dynamic '-'/1.
 
+%DATA---------------------------------------
+%data(Mora, Minutos, Dia, Mes, Ano)
+%data(D,M,A) :- natural(D), D =< 31, natural(M), M =< 12, integer(A).
+
+
 % UTENTE--------------------------------------------------------------------------------------------
 % utente(#IdUt, Nome, Idade, Morada)
 :- dynamic utente/4.
@@ -100,12 +105,33 @@ excecao(prestador(IdPrest, Nome, Especialidade, Instituicao)) :- prestador(IdPre
 % cuidado(#IdUt, #IdPrest, Descricao, Custo)
 :- dynamic cuidado/6.
 
--cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :- nao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)),
-                                             nao(excecao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo))).
-
 %% Invariantes de Cuidados 
+
+% O prestador e o utente tem de existir para poder haver cuidado.
++cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: (utente(IdUt,_,_,_), prestador(IdPrest,_,_,_)).
+
+% Não pode haver cuidados repetidos.
++cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: (
+                                                            findall(IdCuid, cuidado(IdCuid, _, _, _, _, _), L1),
+                                                            comprimento(L1, 1) % Não pode haver repetidos
+                                                         ).
+
+% Um prestador não pode ter mais do que 8 cuidados por dia 
++cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: (
+                                                            findall(Data, cuidado(_, Data, _, _, _, _), L1),
+                                                            comprimento(L1, S), S=<8
+                                                         ).
+
+
+
+%find(cuidado(IdUt, Nome, Idade, Morada),R) :- findall((IdUt, Nome, Idade, Morada), -utente(IdUt, Nome, Idade, Morada), R).
+
 +cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nulo(IdUt)).
++cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nulo(IdPrest)).
 +cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nulo(Descricao)).
+
+-cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :- nao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)),
+                                                           nao(excecao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo))).
 
 -cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nuloInterdito(Data)).
 -cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nuloInterdito(IdUt)).
@@ -158,12 +184,11 @@ addCuidadoNeg(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :- evolucao(-cuidad
 +(-cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)) :: (findall(IdCuid, -cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo), L),
                                           comprimento(L,2)).
 
-%find(-utente(IdUt, Nome, Idade, Morada),R) :- findall((IdUt, Nome, Idade, Morada), -utente(IdUt, Nome, Idade, Morada), R).
 
 %% Alteração de conhecimento positivo no Sistema --------------------------------------
-alterUserNome(IdUt,Nome):- utente(IdUt,N,I,M), atualizacao(utente(IdUt,N,I,M), utente(IdUt,Nome,I,M)).
-alterUserIdade(IdUt,Idade):- utente(IdUt,N,I,M), atualizacao(utente(IdUt,N,I,M), utente(IdUt,N,Idade,M)).
-alterUserMorada(IdUt,Morada):- utente(IdUt,N,I,M), atualizacao(utente(IdUt,N,I,M), utente(IdUt,N,I,Morada)).
+alterUtenteNome(IdUt,Nome):- utente(IdUt,N,I,M), atualizacao(utente(IdUt,N,I,M), utente(IdUt,Nome,I,M)).
+alterUtenteIdade(IdUt,Idade):- utente(IdUt,N,I,M), atualizacao(utente(IdUt,N,I,M), utente(IdUt,N,Idade,M)).
+alterUtenteMorada(IdUt,Morada):- utente(IdUt,N,I,M), atualizacao(utente(IdUt,N,I,M), utente(IdUt,N,I,Morada)).
 
 alterPrestadorNome(IdPrest,Nome):- prestador(IdPrest, N, E, I), atualizacao(prestador(IdPrest, N, E, I),prestador(IdPrest, Nome, E, I)).
 alterPrestadorEspecialidade(IdPrest,Esp):- prestador(IdPrest, N, E, I), atualizacao(prestador(IdPrest, N, E, I),prestador(IdPrest, N, Esp, I)).
@@ -183,9 +208,9 @@ contem(M, [_|T]) :- contem(M, T).
 %% Remoção do Sistema --------------------------------
 utente(4,[jorge,manuel],[12,13],aveiro).
 
-test(1):- addUtente(2,[dan,mig],[range(12,20)],braga).
-test(2):- addPrestador(2,mig,[pediatria,obstetricia],hospitalBraga).
-test(3):- addCuidado(2,marco,2,nulo,texto,nuloInterdito).
+test(1):- addUtentePos(2,[dan,mig],[range(12,20)],braga).
+test(2):- addPrestadorPos(2,mig,[pediatria,obstetricia],hospitalBraga).
+test(3):- addCuidadoPos(2,marco,2,nulo,texto,nuloInterdito).
 test(4):- atualizacao(utente(2,dan,[14],braga),utente(2,dan,20,braga)).
 test(5):- atualizacao(utente(1, daniel, nuloInterdito, nuloInterdito),utente(1, marcoDantas, nuloInterdito, nuloInterdito)).
 utente(1, daniel, nuloInterdito, nuloInterdito).
