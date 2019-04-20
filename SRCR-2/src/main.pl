@@ -107,8 +107,19 @@ excecao(prestador(IdPrest, Nome, Especialidade, Instituicao)) :- prestador(IdPre
 
 %% Invariantes de Cuidados 
 
-% O prestador e o utente tem de existir para poder haver cuidado.
-+cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: (utente(IdUt,_,_,_), prestador(IdPrest,_,_,_)).
+% O prestador e o utente tem de existir para poder haver cuidado se não for nulo
++cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: ou(
+                                                            (utente(IdUt,_,_,_), prestador(IdPrest,_,_,_)),
+                                                            ou(
+                                                               (nulo(IdCuid), prestador(IdPrest,_,_,_)),
+                                                               ou(
+                                                                  (utente(IdUt,_,_,_), nulo(IdPrest)),
+                                                                  (nulo(IdUt), nulo(IdPrest)),
+                                                                  verdadeiro),
+                                                               verdadeiro
+                                                            ),
+                                                            verdadeiro
+                                                         ).
 
 % Não pode haver cuidados repetidos.
 +cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: (
@@ -125,9 +136,9 @@ excecao(prestador(IdPrest, Nome, Especialidade, Instituicao)) :- prestador(IdPre
 
 %find(cuidado(IdUt, Nome, Idade, Morada),R) :- findall((IdUt, Nome, Idade, Morada), -utente(IdUt, Nome, Idade, Morada), R).
 
-+cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nulo(IdUt)).
-+cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nulo(IdPrest)).
-+cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nulo(Descricao)).
+%+cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nulo(IdUt)).
+%+cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nulo(IdPrest)).
+%+cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nulo(Descricao)).
 
 -cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :- nao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)),
                                                            nao(excecao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo))).
@@ -199,10 +210,11 @@ alterCuidadoPrest(IdCuid,Pret) :- cuidado(IdCuid, D, IU, IP, De, C), atualizacao
 alterCuidadoDesc(IdCuid,Desc) :- cuidado(IdCuid, D, IU, IP, De, C), atualizacao(cuidado(IdCuid, D, IU, IP, De, C),cuidado(IdCuid, D, IU, IP, Desc, C)).
 alterCuidadoCust(IdCuid,Custo) :- cuidado(IdCuid, D, IU, IP, De, C), atualizacao(cuidado(IdCuid, D, IU, IP, De, C),cuidado(IdCuid, D, IU, IP, De, Custo)).
 
-contem(M, M).
-contem(M, [M|T]).
-contem(M, [(range(L, H))|T]) :- M >= L, M =< H.
-contem(M, [_|T]) :- contem(M, T).
+contem(X, X).
+contem(X, [X|T]).
+% Contem especial para intervalos
+contem(X, [(range(L, H))|T]) :- X >= L, X =< H.
+contem(X, [_|T]) :- contem(X, T).
 
 %Cálculo da quantidade de gastos de um utente.
 % CC -> CustoCerto -- quanto paga de certeza
@@ -226,8 +238,6 @@ utente(4,[jorge,manuel],[12,13],aveiro).
 
 test(1):- addUtentePos(2,[dan,mig],[range(12,20)],braga).
 test(2):- addPrestadorPos(2,mig,[pediatria,obstetricia],hospitalBraga).
-test(3):- addCuidadoPos(2,marco,2,nulo,texto,nuloInterdito).
-test(4):- atualizacao(utente(2,dan,[14],braga),utente(2,dan,20,braga)).
-test(5):- atualizacao(utente(1, daniel, nuloInterdito, nuloInterdito),utente(1, marcoDantas, nuloInterdito, nuloInterdito)).
-utente(1, daniel, nuloInterdito, nuloInterdito).
-prestador(1, miguel, nulo, nulo).
+test(3):- addCuidadoPos(2,[data(3, 1, 2019), data(3, 1, 2019)], 2, nulo, texto, nuloInterdito).
+% test(4):- atualizacao(utente(2,dan,[14],braga), utente(2,dan,20,braga)).
+% test(5):- atualizacao(utente(1, daniel, nuloInterdito, nuloInterdito), utente(1, marcoDantas, nuloInterdito, nuloInterdito)).
