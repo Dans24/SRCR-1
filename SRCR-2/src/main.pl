@@ -123,7 +123,6 @@ excecao(prestador(IdPrest, Nome, Especialidade, Instituicao)) :- prestador(IdPre
                                                          ).
 
 
-
 %find(cuidado(IdUt, Nome, Idade, Morada),R) :- findall((IdUt, Nome, Idade, Morada), -utente(IdUt, Nome, Idade, Morada), R).
 
 +cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nulo(IdUt)).
@@ -204,6 +203,23 @@ contem(M, M).
 contem(M, [M|T]).
 contem(M, [(range(L, H))|T]) :- M >= L, M =< H.
 contem(M, [_|T]) :- contem(M, T).
+
+%Cálculo da quantidade de gastos de um utente.
+% CC -> CustoCerto -- quanto paga de certeza
+% II -> IncertezaInferior -- valor minimo que é incerto pagar
+% IS -> IncertezaSuperior -- valor máximo que é incerto pagar
+gastosTotaisCliente(IdUt, CC, II, IS) :- findall(C, consulta(_, _, IdUt, _, _, C), L), soma(L,CC,II,IS).
+
+
+soma([], 0, 0, 0).
+soma([[H|T1]|T2], Total, IITotal, ISTotal) :- soma(T2, Total, RestoI, RestoS), somaI([H|T1], AuxI, AuxS), 
+                                                                               IITotal is RestoI + AuxI, 
+                                                                               ISTotal is RestoS + AuxS.  
+soma([H|T], Total, II, IS) :- soma(T, Resto, II, IS), Total is H + Resto.
+
+somaI([], 0, 0).
+somaI([(range(X, Y))|T], IITotal, ISTotal) :- somaI(T, RestoI, RestoS), IITotal is RestoI + X, ISTotal is RestoS + Y.
+somaI([H|T], IITotal, ISTotal) :- somaI(T, RestoI, RestoS), IITotal is RestoI + H, ISTotal is RestoS + H.
 
 %% Remoção do Sistema --------------------------------
 utente(4,[jorge,manuel],[12,13],aveiro).
