@@ -12,12 +12,11 @@ insercao(T) :- assert(T).
 insercao(T) :- retract(T),!,fail.
 
 
-
 atualizacao(Tantigo, Tnovo) :- Tantigo,
                                findall(Invariante, +Tnovo :: Invariante, Lista),
-                               findall(Invariantes, update(Tantigo) :: Invariantes, Listas),
+                               findall(Invariantes, update(Tantigo) :: Invariantes, ListaUpd),
                                insercao(Tantigo,Tnovo),
-                               teste(Listas),
+                               teste(ListaUpd),
                                teste(Lista).
 
 insercao(Tantigo,Tnovo) :- assert(Tnovo),retract(Tantigo).
