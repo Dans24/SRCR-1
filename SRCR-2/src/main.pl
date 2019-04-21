@@ -1,4 +1,5 @@
-?- consult(['inv.pl','si.pl']).
+
+?- consult(['si.pl','inv.pl']).
 
 nuloInterdito(nuloInterdito).
 
@@ -11,6 +12,25 @@ nuloGenerico(nuloInterdito).
 
 :- dynamic excecao/1.
 :- dynamic '-'/1.
+
+%Extensões do SI
+%e predicado conjunção
+e(T1,T2):-si(T1,verdadeiro),si(T2,verdadeiro).
+-e(T1,T2):- si(T1,falso).
+-e(T1,T2):- si(T2,falso).
+
+
+%ou predicado conjunção
+ou(T1,T2):- si(T1,verdadeiro).
+ou(T1,T2):- si(T2,verdadeiro).
+-ou(T1,T2):- si(T1,falso),si(T2,falso).
+
+
+%xor
+xor(T1,T2):- si(T1,verdadeiro),si(T2,falso).
+xor(T1,T2):- si(T1,falso),si(T2,verdadeiro).
+-xor(T1,T2):- si(T1,verdadeiro),si(T2,verdadeiro).
+-xor(T1,T2):- si(T1,falso),si(T2,falso).
 
 %DATA---------------------------------------
 %data(Mora, Minutos, Dia, Mes, Ano)
@@ -28,10 +48,11 @@ nuloGenerico(nuloInterdito).
 +utente(IdUt, Nome, Idade, Morada) :: (
                                         findall(IdUt, utente(IdUt, _, _, _), L1),
                                         comprimento(L1, 1), % Não pode haver repetidos
-                                        ou( 
+                                        si(
+                                          ou( 
                                             e( integer(Idade), Idade >= 0, verdadeiro), 
-                                            nulo(Idade), 
-                                            verdadeiro
+                                            nulo(Idade)
+                                          )
                                         ) % Idade é um inteiro positivo ou é um nulo.
                                       ).
 
@@ -59,9 +80,9 @@ update(utente(IdUt, _, _, _)) :: utente(IdUt, _, _, _).
 
 %% Exceções de utente
 excecao(utente(IdUt, Nome, Idade, Morada)) :- utente(IdUt, ListaDeNome, ListaDeIdade, ListaDeMorada),
-                                            ou(contem(Nome, ListaDeNome), nuloGenerico(ListaDeNome), verdadeiro),
-                                            ou(contem(Idade, ListaDeIdade), nuloGenerico(ListaDeIdade), verdadeiro),
-                                            ou(contem(Morada, ListaDeMorada), nuloGenerico(ListaDeMorada), verdadeiro).
+                                            si(ou(contem(Nome, ListaDeNome), nuloGenerico(ListaDeNome)), verdadeiro),
+                                            si(ou(contem(Idade, ListaDeIdade), nuloGenerico(ListaDeIdade)), verdadeiro),
+                                            si(ou(contem(Morada, ListaDeMorada), nuloGenerico(ListaDeMorada)), verdadeiro).
 
 % PRESTADOR------------------------------------------------------------------------------------------
 % prestador(#IdPrest, Nome, Especialidade, Instituicao)
@@ -96,9 +117,9 @@ update(prestador(IdPrest, _, _, _)) :: prestador(IdPrest, _,_,_).
  
 %% Excecoes de Prestador 
 excecao(prestador(IdPrest, Nome, Especialidade, Instituicao)) :- prestador(IdPrest, ListaDeNome, ListaDeEspecialidade, ListaDeInstituicao),
-                                                                 ou(contem(Nome, ListaDeNome), nuloGenerico(ListaDeNome),verdadeiro),
-                                                                 ou(contem(Especialidade, ListaDeEspecialidade), nuloGenerico(ListaDeEspecialidade),verdadeiro),
-                                                                 ou(contem(Instituicao, ListaDeInstituicao), nuloGenerico(ListaDeInstituicao),verdadeiro).
+                                                                 si(ou(contem(Nome, ListaDeNome), nuloGenerico(ListaDeNome)),verdadeiro),
+                                                                 si(ou(contem(Especialidade, ListaDeEspecialidade), nuloGenerico(ListaDeEspecialidade)),verdadeiro),
+                                                                 si(ou(contem(Instituicao, ListaDeInstituicao), nuloGenerico(ListaDeInstituicao)),verdadeiro).
 
 
 % CUIDADO--------------------------------------------------------------------------------------------
@@ -108,15 +129,15 @@ excecao(prestador(IdPrest, Nome, Especialidade, Instituicao)) :- prestador(IdPre
 %% Invariantes de Cuidados 
 
 % O prestador e o utente tem de existir para poder haver cuidado se não for nulo
-+cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: ou(
-                                                            (utente(IdUt,_,_,_), prestador(IdPrest,_,_,_)),
-                                                            ou(
-                                                               (nulo(IdCuid), prestador(IdPrest,_,_,_)),
++cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) ::si(ou(
+                                                               (utente(IdUt,_,_,_), prestador(IdPrest,_,_,_)),
                                                                ou(
-                                                                  (utente(IdUt,_,_,_), nulo(IdPrest)),
-                                                                  (nulo(IdUt), nulo(IdPrest)),
-                                                                  verdadeiro),
-                                                               verdadeiro
+                                                                  (nulo(IdCuid), prestador(IdPrest,_,_,_)),
+                                                                  ou(
+                                                                     (utente(IdUt,_,_,_), nulo(IdPrest)),
+                                                                     (nulo(IdUt), nulo(IdPrest))
+                                                                  )
+                                                               )
                                                             ),
                                                             verdadeiro
                                                          ).
@@ -157,11 +178,11 @@ update(cuidado(IdCuid, _, _, _, _, _))  :: cuidado(IdCuid, _, _, _, _, _).
 
 %% Excecoes de Cuidado
 excecao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)) :- cuidado(IdCuid, ListaDeData, ListaDeIdUt, ListaDeIdPrest, ListaDeDescricao, ListaDeCusto),
-                                            ou(contem(Data, ListaDeData), nuloGenerico(ListaDeData), verdadeiro),
-                                            ou(contem(IdUt, ListaDeIdUt), nuloGenerico(ListaDeIdUt), verdadeiro),
-                                            ou(contem(IdPrest, ListaDeIdPrest), nuloGenerico(ListaDePrest), verdadeiro),
-                                            ou(contem(Descricao, ListaDeDescricao), nuloGenerico(ListaDeDescricao), verdadeiro),
-                                            ou(contem(Custo, ListaDeCusto), nuloGenerico(ListaDeCusto), verdadeiro).
+                                            si(ou(contem(Data, ListaDeData), nuloGenerico(ListaDeData)), verdadeiro),
+                                            si(ou(contem(IdUt, ListaDeIdUt), nuloGenerico(ListaDeIdUt)), verdadeiro),
+                                            si(ou(contem(IdPrest, ListaDeIdPrest), nuloGenerico(ListaDePrest)), verdadeiro),
+                                            si(ou(contem(Descricao, ListaDeDescricao), nuloGenerico(ListaDeDescricao)), verdadeiro),
+                                            si(ou(contem(Custo, ListaDeCusto), nuloGenerico(ListaDeCusto)), verdadeiro).
 
 % Manipulacao da Base de Conhecimento----------------------------------------------------------------
 
