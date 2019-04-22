@@ -296,7 +296,10 @@ somaAux([(range(X, Y))|T], IITotal, ISTotal) :- somaAux(T, RestoI, RestoS), IITo
 somaAux([H|T], IITotal, ISTotal) :- somaAux(T, RestoI, RestoS), IITotal is RestoI + H, ISTotal is RestoS + H.
 
 %% Remoção do Sistema --------------------------------
-utente(4,[jorge,manuel],[12,13],aveiro).
+utente(3,[jorge,manuel],[range(12,14)],aveiro).
+utente(1, diogo, 32, guimaraes).
+utente(2, maria, 12, nulo).
+prestador(1, nuloInterdito, cardiologia, hospitalBraga).
 
 test(1):- addUtentePos(2,[dan,mig],[range(12,20)],braga).
 test(2):- addPrestadorPos(2,nuloInterdito,[pediatria,obstetricia],hospitalBraga).
