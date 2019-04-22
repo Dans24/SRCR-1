@@ -105,12 +105,11 @@ excecao(utente(IdUt, Nome, Idade, Morada)) :- utente(IdUt, ListaDeNome, ListaDeI
                                                             comprimento(L1, 0)
                                                          ).
 
--prestador(IdPrest, Nome, Especialidade, Instituicao) :: nao(nuloIntedito(Nome)).
--prestador(IdPrest, Nome, Especialidade, Instituicao) :: nao(nuloIntedito(Especialidade)).
--prestador(IdPrest, Nome, Especialidade, Instituicao) :: nao(nuloIntedito(Instituicao)).
-
-update(prestador(IdPrest, nuloIntedito, _, _))  :: prestador(IdPrest, nuloInterdito,_,_).
-update(prestador(IdPrest, _, nuloIntedito, _))  :: prestador(IdPrest, _,nuloInterdito,_).
+-prestador(IdPrest, Nome, Especialidade, Instituicao) :: nao(nuloInterdito(Nome)).
+-prestador(IdPrest, Nome, Especialidade, Instituicao) :: nao(nuloInterdito(Especialidade)).
+-prestador(IdPrest, Nome, Especialidade, Instituicao) :: nao(nuloInterdito(Instituicao)).
+update(prestador(IdPrest, nuloInterdito, _, _))  :: prestador(IdPrest, nuloInterdito,_,_).
+update(prestador(IdPrest, _, nuloInterdito, _))  :: prestador(IdPrest, _,nuloInterdito,_).
 update(prestador(IdPrest, _, _, nuloInterdito)) :: prestador(IdPrest, _,_,nuloInterdito).
 update(prestador(IdPrest, _, _, _)) :: prestador(IdPrest, _,_,_).
 
@@ -171,10 +170,10 @@ excecao(prestador(IdPrest, Nome, Especialidade, Instituicao)) :- prestador(IdPre
 -cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nuloInterdito(Descricao)).
 -cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nuloInterdito(Custo)).
 
-update(cuidado(IdCuid, _, nuloIntedito, _, _, _))  :: cuidado(IdCuid, _, nuloIntedito, _, _, _).
-update(cuidado(IdCuid, _, _, nuloIntedito, _, _))  :: cuidado(IdCuid, _, _, nuloInterdito, _, _).
-update(cuidado(IdCuid, _, _, _, nuloIntedito, _))  :: cuidado(IdCuid, _, _, _, nuloInterdito, _).
-update(cuidado(IdCuid, _, _, _, _, nuloIntedito))  :: cuidado(IdCuid, _, _, _, _, nuloInterdito).
+update(cuidado(IdCuid, _, nuloInterdito, _, _, _))  :: cuidado(IdCuid, _, nuloInterdito, _, _, _).
+update(cuidado(IdCuid, _, _, nuloInterdito, _, _))  :: cuidado(IdCuid, _, _, nuloInterdito, _, _).
+update(cuidado(IdCuid, _, _, _, nuloInterdito, _))  :: cuidado(IdCuid, _, _, _, nuloInterdito, _).
+update(cuidado(IdCuid, _, _, _, _, nuloInterdito))  :: cuidado(IdCuid, _, _, _, _, nuloInterdito).
 update(cuidado(IdCuid, _, _, _, _, _))  :: cuidado(IdCuid, _, _, _, _, _).
 
 %% Excecoes de Cuidado
@@ -222,7 +221,7 @@ alterUtenteNome(IdUt,Nome):- utente(IdUt,N,I,M), atualizacao(utente(IdUt,N,I,M),
 alterUtenteIdade(IdUt,Idade):- utente(IdUt,N,I,M), atualizacao(utente(IdUt,N,I,M), utente(IdUt,N,Idade,M)).
 alterUtenteMorada(IdUt,Morada):- utente(IdUt,N,I,M), atualizacao(utente(IdUt,N,I,M), utente(IdUt,N,I,Morada)).
 
-alterPrestadorNome(IdPrest,Nome):- prestador(IdPrest, N, E, I), atualizacao(prestador(IdPrest, N, E, I),prestador(IdPrest, Nome, E, I)).
+alterPrestadorNome(IdPrest,Nome):- prestador(IdPrest, N, E, I),atualizacao(prestador(IdPrest, N, E, I),prestador(IdPrest, Nome, E, I)).
 alterPrestadorEspecialidade(IdPrest,Esp):- prestador(IdPrest, N, E, I), atualizacao(prestador(IdPrest, N, E, I),prestador(IdPrest, N, Esp, I)).
 alterPrestadorInstituicao(IdPrest,Inst):- prestador(IdPrest, N, E, I), atualizacao(prestador(IdPrest, N, E, I),prestador(IdPrest, N, E, Inst)).
 
@@ -300,7 +299,7 @@ somaAux([H|T], IITotal, ISTotal) :- somaAux(T, RestoI, RestoS), IITotal is Resto
 utente(4,[jorge,manuel],[12,13],aveiro).
 
 test(1):- addUtentePos(2,[dan,mig],[range(12,20)],braga).
-test(2):- addPrestadorPos(2,mig,[pediatria,obstetricia],hospitalBraga).
+test(2):- addPrestadorPos(2,nuloInterdito,[pediatria,obstetricia],hospitalBraga).
 test(3):- addCuidadoPos(1,22/10/2000,2,2,sdf,[range(30,50)]), addCuidadoPos(2,22/10/2000,2,2,sdf,20).
 test(4):- addCuidadoPos(3,[data(3, 1, 2019), data(3, 1, 2019)], 2, nulo, texto, nuloInterdito).
 % test(4):- atualizacao(utente(2,dan,[14],braga), utente(2,dan,20,braga)).
