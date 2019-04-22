@@ -7,8 +7,8 @@ nulo(nulo).
 nulo([H|T]).
 nulo(nuloInterdito).
 
-nuloGenerico(nulo).
-nuloGenerico(nuloInterdito).
+nuloNaoImpreciso(nulo).
+nuloNaoImpreciso(nuloInterdito).
 
 :- dynamic excecao/1.
 :- dynamic '-'/1.
@@ -80,10 +80,11 @@ update(utente(IdUt, _, _, nuloInterdito)) :: utente(IdUt, _, _, nuloInterdito).
 update(utente(IdUt, _, _, _)) :: utente(IdUt, _, _, _).
 
 %% Exceções de utente
-excecao(utente(IdUt, Nome, Idade, Morada)) :- utente(IdUt, ListaDeNome, ListaDeIdade, ListaDeMorada),
-                                            si(ou(contem(Nome, ListaDeNome), nuloGenerico(ListaDeNome)), verdadeiro),
-                                            si(ou(contem(Idade, ListaDeIdade), nuloGenerico(ListaDeIdade)), verdadeiro),
-                                            si(ou(contem(Morada, ListaDeMorada), nuloGenerico(ListaDeMorada)), verdadeiro).
+excecao(utente(IdUt, Nome, Idade, Morada)) :- 
+      utente(IdUt, ListaDeNome, ListaDeIdade, ListaDeMorada),
+      si(ou(contem(Nome, ListaDeNome), nuloNaoImpreciso(ListaDeNome)), verdadeiro),
+      si(ou(contem(Idade, ListaDeIdade), nuloNaoImpreciso(ListaDeIdade)), verdadeiro),
+      si(ou(contem(Morada, ListaDeMorada), nuloNaoImpreciso(ListaDeMorada)), verdadeiro).
 
 % PRESTADOR------------------------------------------------------------------------------------------
 % prestador(#IdPrest, Nome, Especialidade, Instituicao)
@@ -117,9 +118,9 @@ update(prestador(IdPrest, _, _, _)) :: prestador(IdPrest, _,_,_).
  
 %% Excecoes de Prestador 
 excecao(prestador(IdPrest, Nome, Especialidade, Instituicao)) :- prestador(IdPrest, ListaDeNome, ListaDeEspecialidade, ListaDeInstituicao),
-                                                                 si(ou(contem(Nome, ListaDeNome), nuloGenerico(ListaDeNome)),verdadeiro),
-                                                                 si(ou(contem(Especialidade, ListaDeEspecialidade), nuloGenerico(ListaDeEspecialidade)),verdadeiro),
-                                                                 si(ou(contem(Instituicao, ListaDeInstituicao), nuloGenerico(ListaDeInstituicao)),verdadeiro).
+                                                                 si(ou(contem(Nome, ListaDeNome), nuloNaoImpreciso(ListaDeNome)),verdadeiro),
+                                                                 si(ou(contem(Especialidade, ListaDeEspecialidade), nuloNaoImpreciso(ListaDeEspecialidade)),verdadeiro),
+                                                                 si(ou(contem(Instituicao, ListaDeInstituicao), nuloNaoImpreciso(ListaDeInstituicao)),verdadeiro).
 
 
 % CUIDADO--------------------------------------------------------------------------------------------
@@ -178,11 +179,11 @@ update(cuidado(IdCuid, _, _, _, _, _))  :: cuidado(IdCuid, _, _, _, _, _).
 
 %% Excecoes de Cuidado
 excecao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)) :- cuidado(IdCuid, ListaDeData, ListaDeIdUt, ListaDeIdPrest, ListaDeDescricao, ListaDeCusto),
-                                            si(ou(contem(Data, ListaDeData), nuloGenerico(ListaDeData)), verdadeiro),
-                                            si(ou(contem(IdUt, ListaDeIdUt), nuloGenerico(ListaDeIdUt)), verdadeiro),
-                                            si(ou(contem(IdPrest, ListaDeIdPrest), nuloGenerico(ListaDePrest)), verdadeiro),
-                                            si(ou(contem(Descricao, ListaDeDescricao), nuloGenerico(ListaDeDescricao)), verdadeiro),
-                                            si(ou(contem(Custo, ListaDeCusto), nuloGenerico(ListaDeCusto)), verdadeiro).
+                                            si(ou(contem(Data, ListaDeData), nuloNaoImpreciso(ListaDeData)), verdadeiro),
+                                            si(ou(contem(IdUt, ListaDeIdUt), nuloNaoImpreciso(ListaDeIdUt)), verdadeiro),
+                                            si(ou(contem(IdPrest, ListaDeIdPrest), nuloNaoImpreciso(ListaDePrest)), verdadeiro),
+                                            si(ou(contem(Descricao, ListaDeDescricao), nuloNaoImpreciso(ListaDeDescricao)), verdadeiro),
+                                            si(ou(contem(Custo, ListaDeCusto), nuloNaoImpreciso(ListaDeCusto)), verdadeiro).
 
 % Manipulacao da Base de Conhecimento----------------------------------------------------------------
 
