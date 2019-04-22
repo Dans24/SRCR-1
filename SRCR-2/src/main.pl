@@ -32,10 +32,6 @@ xor(T1,T2):- si(T1,falso),si(T2,verdadeiro).
 -xor(T1,T2):- si(T1,verdadeiro),si(T2,verdadeiro).
 -xor(T1,T2):- si(T1,falso),si(T2,falso).
 
-%DATA---------------------------------------
-%data(Mora, Minutos, Dia, Mes, Ano)
-%data(D,M,A) :- natural(D), D =< 31, natural(M), M =< 12, integer(A).
-
 
 % UTENTE--------------------------------------------------------------------------------------------
 % utente(#IdUt, Nome, Idade, Morada)
@@ -56,7 +52,6 @@ xor(T1,T2):- si(T1,falso),si(T2,verdadeiro).
                                           verdadeiro
                                         ) % Idade é um inteiro positivo ou é um nulo.
                                       ).
-
 +utente(IdUt, Nome, Idade, Morada) :: nao(nulo(IdUt)).
 
 -utente(IdUt, Nome, Idade, Morada) :: nao(nuloInterdito(Idade)).
@@ -109,6 +104,7 @@ excecao(utente(IdUt, Nome, Idade, Morada)) :-
 -prestador(IdPrest, Nome, Especialidade, Instituicao) :: nao(nuloInterdito(Nome)).
 -prestador(IdPrest, Nome, Especialidade, Instituicao) :: nao(nuloInterdito(Especialidade)).
 -prestador(IdPrest, Nome, Especialidade, Instituicao) :: nao(nuloInterdito(Instituicao)).
+
 update(prestador(IdPrest, nuloInterdito, _, _))  :: prestador(IdPrest, nuloInterdito,_,_).
 update(prestador(IdPrest, _, nuloInterdito, _))  :: prestador(IdPrest, _,nuloInterdito,_).
 update(prestador(IdPrest, _, _, nuloInterdito)) :: prestador(IdPrest, _,_,nuloInterdito).
@@ -127,6 +123,8 @@ excecao(prestador(IdPrest, Nome, Especialidade, Instituicao)) :- prestador(IdPre
 % cuidado(#IdUt, #IdPrest, Descricao, Custo)
 :- dynamic cuidado/6.
 
+-cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :- nao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)),
+                                                           nao(excecao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo))).
 %% Invariantes de Cuidados 
 
 % O prestador e o utente tem de existir para poder haver cuidado se não for nulo
@@ -154,16 +152,6 @@ excecao(prestador(IdPrest, Nome, Especialidade, Instituicao)) :- prestador(IdPre
                                                             findall(Data, cuidado(_, Data, _, _, _, _), L1),
                                                             comprimento(L1, S), S=<8
                                                          ).
-
-
-%find(cuidado(IdUt, Nome, Idade, Morada),R) :- findall((IdUt, Nome, Idade, Morada), -utente(IdUt, Nome, Idade, Morada), R).
-
-%+cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nulo(IdUt)).
-%+cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nulo(IdPrest)).
-%+cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nulo(Descricao)).
-
--cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :- nao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)),
-                                                           nao(excecao(cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo))).
 
 -cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nuloInterdito(Data)).
 -cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :: nao(nuloInterdito(IdUt)).
