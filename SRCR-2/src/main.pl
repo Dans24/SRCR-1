@@ -207,13 +207,13 @@ addCuidadoNeg(IdCuid, Data, IdUt, IdPrest, Descricao, Custo) :- evolucao(-cuidad
 
 % Não se pode adicionar conhecimento negativo repetido, ou seja, todas as variáveis iguais.
 +(-utente(IdUt, Nome, Idade, Morada)) :: (findall(IdUt, -utente(IdUt, Nome, Idade, Morada), L),
-                                          comprimento(L,2)).
+                                          comprimento(L,1)).
 
 +(-prestador(IdPrest, Nome, Especialidade, Instituicao)) :: (findall(IdPrest, -prestador(IdPrest, Nome, Especialidade, Instituicao), L),
-                                          comprimento(L,2)).
+                                          comprimento(L,1)).
 
 +(-cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo)) :: (findall(IdCuid, -cuidado(IdCuid, Data, IdUt, IdPrest, Descricao, Custo), L),
-                                          comprimento(L,2)).
+                                          comprimento(L,1)).
 
 
 %% Alteração de conhecimento positivo no Sistema --------------------------------------
