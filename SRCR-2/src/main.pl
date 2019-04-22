@@ -50,9 +50,10 @@ xor(T1,T2):- si(T1,falso),si(T2,verdadeiro).
                                         comprimento(L1, 1), % Não pode haver repetidos
                                         si(
                                           ou( 
-                                            e( integer(Idade), Idade >= 0, verdadeiro), 
+                                            e( integer(Idade), Idade >= 0), 
                                             nulo(Idade)
-                                          )
+                                          ),
+                                          verdadeiro
                                         ) % Idade é um inteiro positivo ou é um nulo.
                                       ).
 
