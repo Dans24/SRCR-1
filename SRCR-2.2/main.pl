@@ -116,13 +116,22 @@ interdito(interdito).
 
 
 %% Excecoes
-%%  excecao(Utente(IdUt,Nome,Idade,Morada))
+%% excecao(Utente(IdUt,Nome,Idade,Morada))
+%% As exceções que permitem várias combinações conhecimento interdito e incerto
 excecao(utente(Id,N,I,M)):-
-        utente(Id,NUL,I,M), nulo(NUL).
+        utente(Id,NUL1,I,M), nulo(NUL1).
 excecao(utente(Id,N,I,M)):-
-        utente(Id,N,I,NUL), nulo(NUL).
+        utente(Id,N,NUL2,M), nulo(NUL2).
 excecao(utente(Id,N,I,M)):-
-        utente(Id,NUL1,I,NUL2), nulo(NUL1), nulo(NUL2).
+        utente(Id,N,I,NUL3), nulo(NUL3).
+excecao(utente(Id,N,I,M)):-
+        utente(Id,NUL1,NUL2,M), nulo(NUL1), nulo(NUL2).
+excecao(utente(Id,N,I,M)):-
+        utente(Id,NUL1,I,NUL3), nulo(NUL1), nulo(NUL3).
+excecao(utente(Id,N,I,M)):-
+        utente(Id,N,NUL2,NUL3), nulo(NUL2), nulo(NUL3).
+excecao(utente(Id,N,I,M)):-
+        utente(Id,NUL1,NUL2,NUL3), nulo(NUL1),nulo(NUL2),nulo(NUL3).
 
 
 %% Exemplos de Conhecimento Positivo
@@ -132,7 +141,7 @@ utente(1,jorge,25,braga).
 %% Exemplos de Conhecimento Negativo
     %% Sabe-se que a utente numero 2, Maria tem mais do que 40 anos
         %% Logo a Maria não pode ter 40 ou menos anos
--utente(2,maria,IDADE,_):- IDADE <= 40.
+-utente(2,maria,IDADE,_):- IDADE =< 40.
 
 
 %%Exemplos de Utente
