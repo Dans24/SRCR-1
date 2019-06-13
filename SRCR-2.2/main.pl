@@ -132,7 +132,7 @@ interdito(interdito).
 +utente(IdUt,Nome,Idade,Morada)::nao(-utente(IdUt,Nome,Idade,Morada)).
 
 %%% Remoção de Conhecimento
--(utente(IdUt,Nome,Idade,Morada))::nao(interdito(Nome)),nao(interdito(Idade)),nao(interdito(Morada)).
+-(utente(IdUt,Nome,Idade,Morada))::(nao(interdito(Nome)),nao(interdito(Idade)),nao(interdito(Morada))).
 
 
 %% Excecoes
@@ -190,3 +190,107 @@ excecao(utente(5,joaquim,_,guimaraes)).
     %% TODO: No caso da idade ser interdita representamos da seguinte forma:
         %% idadeInterdita(5)
     %% Isto serve para, quando for feita uma atualização, prevenir a substituíção de valores interditos.
+
+
+
+%Prestador
+    %% prestador(idPrest,Nome,Especialidade,Instituicao)
+
+:- dynamic prestador/4.
+
+%% Conhecimento Negativo
+-prestador(IdPrest,Nome,Especialidade,Instituicao):-
+        nao(prestador(IdPrest,Nome,Especialidade,Instituicao)),
+        nao(excecao(prestador(IdPrest,Nome,Especialidade,Instituicao))).
+
+
+%% Invariantes
+%%% Inserção de Conhecimento
++prestador(IdPrest,Nome,Especialidade,Instituicao) :: (nao(nulo(IdPrest)),integer(IdPrest)).
+
+%% Não é possivel a inserção de conhecimento se esse conhecimento for interdito
++prestador(IdPrest,Nome,Especialidade,Instituicao)::
+    ou(
+        interdito(Nome),
+        nao(prestador(IdPrest,interdito,Especialidade,Instituicao))
+    ).
++prestador(IdPrest,Nome,Especialidade,Instituicao)::
+    ou(
+        interdito(Especialidade),
+        prestador(IdPrest,Nome,interdito,Instituicao)
+    ).
++prestador(IdPrest,Nome,Especialidade,Instituicao)::
+    ou(
+        interdito(Instituicao),
+        nao(prestador(IdPrest,Nome,Especialidade,interdito))
+    ).
+
+    %%TODO Excecao interdito coisas
+%%TODO invariantes negativos
+
+
+
+%% Excecoes
+%% excecao(prestador(idPrest,Nome,Especialidade,Instituicao))
+%% As exceções que permitem várias combinações conhecimento interdito e incerto
+excecao(prestador(Id,N,E,Inst)):-
+        prestador(Id,NUL1,E,Inst), nulo(NUL1).
+excecao(prestador(Id,N,E,Inst)):-
+        prestador(Id,N,NUL2,Inst), nulo(NUL2).
+excecao(prestador(Id,N,E,Inst)):-
+        prestador(Id,N,E,NUL3), nulo(NUL3).
+excecao(prestador(Id,N,E,Inst)):-
+        prestador(Id,NUL1,NUL2,Inst), nulo(NUL1), nulo(NUL2).
+excecao(prestador(Id,N,E,Inst)):-
+        prestador(Id,NUL1,E,NUL3), nulo(NUL1), nulo(NUL3).
+excecao(prestador(Id,N,E,Inst)):-
+        prestador(Id,N,NUL2,NUL3), nulo(NUL2), nulo(NUL3).
+excecao(prestador(Id,N,E,Inst)):-
+        prestador(Id,NUL1,NUL2,NUL3), nulo(NUL1),nulo(NUL2),nulo(NUL3).
+
+%%TODO Exemplos
+
+%Cuidado
+    %% cuidado(Data,IdUt,IdPrest,Descricao,Custo)
+:- dynamic cuidado/5.
+
+%% Descrição não pode ser nula. Pode ser vazia.
+
+
+%Invariante
++excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo))::
+        (nulo(NUL1), nulo(NUL2), nulo(NUL3), nulo(NUL4), nao( cuidado(NUL1,NUL2,NUL3,Descricao,NUL4))).
+
+%Exceções por causa de interditos.
+excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
+        cuidado(NUL1,IdUt,IdPrest,Descricao,Custo), nulo(NUL1).
+excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
+        cuidado(Data,NUL2,IdPrest,Descricao,Custo), nulo(NUL2).
+excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
+        cuidado(Data,IdUt,NUL3,Descricao,Custo), nulo(NUL3).
+excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
+        cuidado(Data,IdUt,IdPrest,Descricao,NUL4), nulo(NUL4).
+
+excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
+        cuidado(NUL1,NUL2,IdPrest,Descricao,Custo), nulo(NUL1), nulo(NUL2).
+excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
+        cuidado(NUL1,IdUt,NUL3,Descricao,Custo), nulo(NUL1), nulo(NUL3).
+excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
+        cuidado(NUL1,IdUt,IdPrest,Descricao,NUL4), nulo(NUL1), nulo(NUL4).
+
+excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
+        cuidado(Data,NUL2,NUL3,Descricao,Custo), nulo(NUL2), nulo(NUL3).
+excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
+        cuidado(Data,NUL2,IdPrest,Descricao,NUL4), nulo(NUL2), nulo(NUL4).
+
+excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
+        cuidado(Data,IdUt,NUL3,Descricao,NUL4), nulo(NUL3), nulo(NUL4).
+
+excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
+        cuidado(NUL1,NUL2,NUL3,Descricao,Custo), nulo(NUL1), nulo(NUL2), nulo(NUL3).
+excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
+        cuidado(NUL1,IdUt,NUL3,Descricao,NUL4), nulo(NUL1), nulo(NUL3), nulo(NUL4).
+excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
+        cuidado(NUL1,NUL2,IdPrest,Descricao,NUL4), nulo(NUL1), nulo(NUL2), nulo(NUL4).
+excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
+        cuidado(Data,NUL2,NUL3,Descricao,NUL4), nulo(NUL2), nulo(NUL3), nulo(NUL4).
