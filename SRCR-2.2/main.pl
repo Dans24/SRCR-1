@@ -30,6 +30,7 @@ insercao(T):- retract(T),!,fail.
 
 
 %% Improved Evolucao
+%% Os termos dentro da exceção tem de respeitar os invariantes 
 evolucao(excecao(T)):- 
             findall(Invariante, +T::Invariante, Lista),
             insercao(excecao(T)),
@@ -41,10 +42,17 @@ evolucao(T):-
             insercao(T),
             teste(Lista).
 
-%% TODO: INVOLUCAO IMPROVED
-involucao(T):- findall(Invariante, -T :: Invariante, Lista),
-              remocao(T),
-              teste(Lista).
+%% Os termos dentro da exceção tem de respeitar os invariantes
+involucao(excecao(T)):- 
+            findall(Invariante, -T :: Invariante, Lista),
+            remocao(excecao(T)),
+            teste(Lista).
+
+involucao(T):- 
+            nao(isExcecao(T)),
+            findall(Invariante, -T :: Invariante, Lista),
+            remocao(T),
+            teste(Lista).
 
 
 %% Predicados Lógicos
