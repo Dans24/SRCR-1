@@ -104,9 +104,21 @@ interdito(interdito).
     )
 ).
 %% Não é possivel a inserção de conhecimento se esse conhecimento for interdito
-+utente(IdUt,Nome,Idade,Morada)::nao(interdito(Nome)), nao(utente(IdUt,interdito,Idade,Morada)).
-+utente(IdUt,Nome,Idade,Morada)::nao(interdito(Idade)), nao(utente(IdUt,Nome,interdito,Morada)).
-+utente(IdUt,Nome,Idade,Morada)::nao(interdito(Morada)), nao(utente(IdUt,Nome,Idade,interdito)).
++utente(IdUt,Nome,Idade,Morada)::
+    ou(
+        interdito(Nome),
+        nao(utente(IdUt,interdito,Idade,Morada))
+    ).
++utente(IdUt,Nome,Idade,Morada)::
+    ou(
+        interdito(Idade),
+        nao(utente(IdUt,Nome,interdito,Morada))
+    ).
++utente(IdUt,Nome,Idade,Morada)::
+    ou(
+        interdito(Morada),
+        nao(utente(IdUt,Nome,Idade,interdito))
+    ).
 
 %% TODO: se o conhecimento for interdito na exceção não pode inserir valor como no caso de cima ^
 %% Ideia predicados nomeIncerto(Id), idadeIncerto(Id), moradaIncerto(Id) para todos os atributos
@@ -167,8 +179,8 @@ utente(3,interdito,34,turim).
     %% Por causa disto é impossivel determinar se o utente 4 se chama marco ou mario.
     %% Neste caso representamos o conhecimento por duas excecoes.
     %% Sabe-se que o utente habita em braga e tem 21 anos. 
-utente(4,marco,braga,21).
-utente(4,mario,braga,21).
+excecao(utente(4,marco,braga,21)).
+excecao(utente(4,mario,braga,21)).
 
 %% Mistura de conhecimento Impreciso+(Interdito/Incerto)
     %% O utente numero 5 Joaquim tem a idade incerta e, devido a mudanças de habitação não se sabe se este mora em braga ou em guimaraes
