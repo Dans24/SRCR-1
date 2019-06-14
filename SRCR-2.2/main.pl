@@ -227,7 +227,11 @@ excecao(utente(5,joaquim,_,guimaraes)).
 
     %%TODO Excecao interdito coisas
 %%TODO invariantes negativos
-
+-prestador(IdPrest,Nome,Especialidade,Instituicao)::(
+                                        nao(interdito(Nome)),
+                                        nao(interdito(Especialidade)),
+                                        nao(interdito(Instituicao))
+                                        ).
 
 
 %% Excecoes
@@ -258,9 +262,14 @@ excecao(prestador(Id,N,E,Inst)):-
 
 
 %Invariante
-+excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo))::
++cuidado(Data,IdUt,IdPrest,Descricao,Custo)::
         (nulo(NUL1), nulo(NUL2), nulo(NUL3), nulo(NUL4), nao( cuidado(NUL1,NUL2,NUL3,Descricao,NUL4))).
 
+-cuidado(Data,IdUt,IdPrest,Descricao,Custo)::(
+                        nao(interdito(Descricao)),
+                        nao(interdito(Custo))
+                        ).
+                        
 %Exceções por causa de interditos.
 excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
         cuidado(NUL1,IdUt,IdPrest,Descricao,Custo), nulo(NUL1).
