@@ -31,13 +31,14 @@ insercao(T):- retract(T),!,fail.
 
 %% Improved Evolucao
 %% Os termos dentro da exceção tem de respeitar os invariantes 
-evolucao(excecao(T)):- 
-            findall(Invariante, +T::Invariante, Lista),
+evolucaoExcecao(T):-
+            findall(Invariante, +excecao(T)::Invariante, Lista),
+            findall(Invariante, +T::Invariante, Lista2),
             insercao(excecao(T)),
-            teste(Lista).
+            teste(Lista),
+            teste(Lista2).
 
 evolucao(T):-
-            nao(isExcecao(T)),
             findall(Invariante, +T::Invariante, Lista),
             insercao(T),
             teste(Lista).
@@ -193,13 +194,13 @@ excecao(utente(5,joaquim,_,guimaraes)).
 
 
 %% Exemplo de predicado que adiciona várias exceções
-addUtentesImprecisos(Id,[X|T],I,M):- addUtentesImprecisos(Id,X,I,M),addUtentesImprecisos(Id,T,I,M).
-addUtentesImprecisos(Id,[],I,M).
-addUtentesImprecisos(Id,N,[X|T],M):- addUtentesImprecisos(Id,N,X,M),addUtentesImprecisos(Id,N,T,M).
-addUtentesImprecisos(Id,N,[],M).
-addUtentesImprecisos(Id,N,I,[X|T]):- addUtentesImprecisos(Id,N,I,X),addUtentesImprecisos(Id,N,I,T).
-addUtentesImprecisos(Id,N,I,[]).
-addUtentesImprecisos(Id,N,I,M):- evolucao(excecao(utente(Id,N,I,M))).
+addUtentesImprecisos(Id,impreciso([X|T]),I,M):- addUtentesImprecisos(Id,X,I,M),addUtentesImprecisos(Id,impreciso(T),I,M).
+addUtentesImprecisos(Id,impreciso([]),I,M).
+addUtentesImprecisos(Id,N,impreciso([X|T]),M):- addUtentesImprecisos(Id,N,X,M),addUtentesImprecisos(Id,N,impreciso(T),M).
+addUtentesImprecisos(Id,N,impreciso([]),M).
+addUtentesImprecisos(Id,N,I,impreciso([X|T])):- addUtentesImprecisos(Id,N,I,X),addUtentesImprecisos(Id,N,I,impreciso(T)).
+addUtentesImprecisos(Id,N,I,impreciso([])).
+addUtentesImprecisos(Id,N,I,M):- evolucaoExcecao(utente(Id,N,I,M)).
 
 
 %Prestador
