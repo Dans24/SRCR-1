@@ -248,6 +248,16 @@ addUtentesImprecisos(Id,N,I,M):- evolucaoExcecao(utente(Id,N,I,M)).
                                         nao(interdito(Instituicao))
                                         ).
 
+%% Conhecimento positivo não pode ser negativo. 
++prestador(IdPrest,Nome,Especialidade,Instituicao)::nao(-prestador(IdPrest,Nome,Especialidade,Instituicao)).
+
+%%% Remoção de Conhecimento
+-(prestador(IdPrest,Nome,Especialidade,Instituicao))::(nao(interdito(Nome)),nao(interdito(Especialidade)),nao(interdito(Instituicao))).
+
+%% Não se pode adicionar conhecimento negativo com nulos. 
++(-prestador(IdPrest,Nome,Especialidade,Instituicao))::(nao(nulo(Nome))).
++(-prestador(IdPrest,Nome,Especialidade,Instituicao))::nao(nulo(Especialidade)).
++(-prestador(IdPrest,Nome,Especialidade,Instituicao))::nao(nulo(Instituicao)).
 
 %% Excecoes
 %% excecao(prestador(idPrest,Nome,Especialidade,Instituicao))
@@ -284,7 +294,28 @@ excecao(prestador(Id,N,E,Inst)):-
                         nao(interdito(Descricao)),
                         nao(interdito(Custo))
                         ).
-                        
+%% Não é possivel a inserção de conhecimento se esse conhecimento for interdito
++cuidado(Data,IdUt,IdPrest,Descricao,Custo)::
+    ou(
+        interdito(Custo),
+        nao(cuidado(Data,IdUt,IdPrest,Descricao,interdito))
+    ).
+
+%% Conhecimento positivo não pode ser negativo. 
++cuidado(Data,IdUt,IdPrest,Descricao,Custo)::nao(-cuidado(Data,IdUt,IdPrest,Descricao,Custo)).
+
+%%% Remoção de Conhecimento
+%Tens uma em cima, mas não tem nulos nas PK
+%%-(cuidado(Data,IdUt,IdPrest,Descricao,Custo))::(nao(interdito(Data)),nao(interdito(IdUt)), nao(interdito(IdPrest)), nao(interdito(Custo))).
+
+%% Não se pode adicionar conhecimento negativo com nulos. 
++(-cuidado(Data,IdUt,IdPrest,Descricao,Custo))::nao(nulo(Data)).
++(-cuidado(Data,IdUt,IdPrest,Descricao,Custo))::nao(nulo(IdUt)).
++(-cuidado(Data,IdUt,IdPrest,Descricao,Custo))::nao(nulo(IdPrest)).
++(-cuidado(Data,IdUt,IdPrest,Descricao,Custo))::nao(nulo(Descricao)).
++(-cuidado(Data,IdUt,IdPrest,Descricao,Custo))::nao(nulo(Custo)).
+
+
 %Exceções por causa de interditos.
 excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
         cuidado(NUL1,IdUt,IdPrest,Descricao,Custo), nulo(NUL1).
