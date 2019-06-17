@@ -135,6 +135,11 @@ interdito(interdito).
 %%% Remoção de Conhecimento
 -(utente(IdUt,Nome,Idade,Morada))::(nao(interdito(Nome)),nao(interdito(Idade)),nao(interdito(Morada))).
 
+%% Não se pode adicionar conhecimento negativo com nulos. 
++(-utente(IdUt,Nome,Idade,Morada))::(nao(nulo(Nome))).
+%% A idade tem de ser um inteiro.
++(-utente(IdUt,Nome,Idade,Morada))::(nao(nulo(Idade)),integer(Idade)).
++(-utente(IdUt,Nome,Idade,Morada))::(nao(nulo(Morada))).
 
 %% Excecoes
 %% excecao(Utente(IdUt,Nome,Idade,Morada))
