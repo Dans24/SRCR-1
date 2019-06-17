@@ -192,6 +192,15 @@ excecao(utente(5,joaquim,_,guimaraes)).
     %% Isto serve para, quando for feita uma atualização, prevenir a substituíção de valores interditos.
 
 
+%% Exemplo de predicado que adiciona várias exceções
+addUtentesImprecisos(Id,[X|T],I,M):- addUtentesImprecisos(Id,X,I,M),addUtentesImprecisos(Id,T,I,M).
+addUtentesImprecisos(Id,[],I,M).
+addUtentesImprecisos(Id,N,[X|T],M):- addUtentesImprecisos(Id,N,X,M),addUtentesImprecisos(Id,N,T,M).
+addUtentesImprecisos(Id,N,[],M).
+addUtentesImprecisos(Id,N,I,[X|T]):- addUtentesImprecisos(Id,N,I,X),addUtentesImprecisos(Id,N,I,T).
+addUtentesImprecisos(Id,N,I,[]).
+addUtentesImprecisos(Id,N,I,M):- evolucao(excecao(utente(Id,N,I,M))).
+
 
 %Prestador
     %% prestador(idPrest,Nome,Especialidade,Instituicao)
