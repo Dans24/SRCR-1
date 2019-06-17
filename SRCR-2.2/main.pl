@@ -227,7 +227,7 @@ addUtentesImprecisos(Id,N,I,M):- evolucaoExcecao(utente(Id,N,I,M)).
 +prestador(IdPrest,Nome,Especialidade,Instituicao)::
     ou(
         interdito(Especialidade),
-        prestador(IdPrest,Nome,interdito,Instituicao)
+        nao(prestador(IdPrest,Nome,interdito,Instituicao))
     ).
 +prestador(IdPrest,Nome,Especialidade,Instituicao)::
     ou(
