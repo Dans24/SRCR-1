@@ -159,7 +159,7 @@ excecao(utente(Id,N,I,M)):-
 excecao(utente(Id,N,I,M)):-
         utente(Id,NUL1,NUL2,NUL3), nulo(NUL1),nulo(NUL2),nulo(NUL3).
 
-
+%% Exemplos
 %% Exemplos de Conhecimento Positivo
     %% O utente jorge tem 25 anos e mora em braga
 utente(1,jorge,25,braga).
@@ -169,8 +169,6 @@ utente(1,jorge,25,braga).
         %% Logo a Maria não pode ter 40 ou menos anos
 -utente(2,maria,IDADE,_):- IDADE =< 40.
 
-
-%%Exemplos de Utente
 %% Exemplo de conhecimento Incerto
     %% O utente 2 chama-se Maria e mora em guimaraes. A sua idade é incerta, uma vez que não se pergunta a idade a uma senhora
 utente(2,maria,incerto,guimaraes).
@@ -278,6 +276,29 @@ excecao(prestador(Id,N,E,Inst)):-
         prestador(Id,NUL1,NUL2,NUL3), nulo(NUL1),nulo(NUL2),nulo(NUL3).
 
 %%TODO Exemplos
+%% Exemplos de Conhecimento Positivo
+    %% O prestador juan especializa-se em ortopedia no hospital de braga
+prestador(1,juan,ortopedia,hospitalbraga)
+
+%% Exemplos de Conhecimento Negativo
+    %% Sabe-se que o carlos não trabalha no hospital do porto
+-prestador(2,carlos,_,hospitalporto).
+
+%% Exemplo de conhecimento Incerto
+    %% O prestador 2 carlos presta consultas de nutrição, não se sabe no entanto em que local
+prestador(2,carlos,nutricao,incerto).
+
+%% Exemplo de conhecimento Interdito
+    %% Por motivos judiciais é impossivel aceder ao nome do prestador 3
+        %% Este prestador especializa-se em cirurgia geral no hospital da beira
+prestador(3,interdito,cirurgiageral,hospitalbeira).
+
+%% Exemplo de conhecimento Impreciso
+    %% Houve uma corrupção no sistema de dados.
+    %% Por causa disto é impossivel determinar se o prestador antonio se especializa em Oncologia ou Oftalmologia.
+    %% Sabe-se que o servico é prestado em lisboa. 
+excecao(prestador(4,antonio,oncologia,hospitallisboa)).
+excecao(prestador(4,antonio,oftalmologia,hospitallisboa)).
 
 %Cuidado
     %% cuidado(Data,IdUt,IdPrest,Descricao,Custo)
@@ -349,3 +370,14 @@ excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
         cuidado(NUL1,NUL2,IdPrest,Descricao,NUL4), nulo(NUL1), nulo(NUL2), nulo(NUL4).
 excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
         cuidado(Data,NUL2,NUL3,Descricao,NUL4), nulo(NUL2), nulo(NUL3), nulo(NUL4).
+        
+%% Exemplos
+%% Exemplos de Conhecimento Positivo
+
+%% Exemplos de Conhecimento Negativo
+
+%% Exemplo de conhecimento Incerto
+
+%% Exemplo de conhecimento Interdito
+
+%% Exemplo de conhecimento Impreciso
