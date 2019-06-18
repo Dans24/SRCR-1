@@ -238,6 +238,15 @@ addUtentesImprecisos(Id,N,I,M):- evolucaoExcecao(utente(Id,N,I,M)).
         nao(prestador(IdPrest,Nome,Especialidade,interdito))
     ).
 
+%% Conhecimento positivo não pode ser negativo. 
++prestador(IdPrest,Nome,Especialidade,Instituicao)::nao(-prestador(IdPrest,Nome,Especialidade,Instituicao)).
+
+%% Não se pode adicionar conhecimento negativo com nulos. 
++(-prestador(IdPrest,Nome,Especialidade,Instituicao))::(nao(nulo(Nome))).
+%% A idade tem de ser um inteiro.
++(-prestador(IdPrest,Nome,Especialidade,Instituicao))::(nao(nulo(Especialidade)),integer(Idade)).
++(-prestador(IdPrest,Nome,Especialidade,Instituicao))::(nao(nulo(Instituicao))).
+
     %%TODO Excecao interdito coisas
 %%TODO invariantes negativos
 -prestador(IdPrest,Nome,Especialidade,Instituicao)::(
@@ -278,7 +287,7 @@ excecao(prestador(Id,N,E,Inst)):-
 %%TODO Exemplos
 %% Exemplos de Conhecimento Positivo
     %% O prestador juan especializa-se em ortopedia no hospital de braga
-prestador(1,juan,ortopedia,hospitalbraga)
+prestador(1,juan,ortopedia,hospitalbraga).
 
 %% Exemplos de Conhecimento Negativo
     %% Sabe-se que o carlos não trabalha no hospital do porto
