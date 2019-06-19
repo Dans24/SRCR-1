@@ -52,20 +52,6 @@ involucao(T):-
             teste(Lista).
 
 
-%% Predicados Lógicos
-ou(T1,T2):- T1.
-ou(T1,T2):- T2. 
--ou(T1,T2):- -T1,-T2.
-
-e(T1,T2):- T1, T2.
--e(T1,T2):- T1,-T2.
--e(T1,T2):- -T1,T2.
-
-xor(T1,T2):- T1,-T2.
-xor(T1,T2):- -T1,T2.
--xor(T1,T2):- T1,T2.
--xor(T1,T2):- -T1,-T2.
-
 
 :- dynamic excecao/1.
 
@@ -132,7 +118,7 @@ utente(3,interdito,34,turim).
                         S ),
                     comprimento( S,N ), N == 0 
                   ).
-excecao(IdUt,Nome,Idade,Morada):- utente(IdUt,interdito,Idade,Morada).
+excecao(utente(IdUt,Nome,Idade,Morada)):- utente(IdUt,interdito,Idade,Morada).
 
 %% Exemplo de conhecimento Impreciso
     %% Houve uma corrupção no sistema de dados.
@@ -312,9 +298,35 @@ si(T,verdadeiro):- T.
 si(T,falso):- -T.
 si(T,desconhecido):- nao(T),nao(-T).
 
-siList([X|T],verdadeiro):- siList(T,verdadeiro) ,X.
+
+%% Predicados Lógicos
+ou(T1,T2):- T1.
+ou(T1,T2):- T2. 
+-ou(T1,T2):- -T1,-T2.
+
+e(T1,T2):- T1, T2.
+-e(T1,T2):- T1,-T2.
+-e(T1,T2):- -T1,T2.
+
+xor(T1,T2):- T1,-T2.
+xor(T1,T2):- -T1,T2.
+-xor(T1,T2):- T1,T2.
+-xor(T1,T2):- -T1,-T2.
+
 siList([],verdadeiro).
-siList([X|T],falso):- siList(T,_),-X.
-siList([X|T],falso):- siList(T,falso),X.
-siList([X|T],falso):- siList(T,falso),-X.
-siList([X|T],desconhecido):- siList(T,_), nao(X), nao(-X).
+siList([X|T],verdadeiro):- siList(T,verdadeiro), X.
+siList([X|T],desconhecido):- siList(T,desconhecido), X.
+siList([X|T],desconhecido):- siList(T,verdadeiro), nao(X), nao(-X).
+siList([X|T],falso):- siList(T,falso), X.
+siList([X|T],falso):- siList(T,falso), nao(X), nao(-X).
+siList([X|T],falso):- siList(T,desconhecido),-X.
+siList([X|T],falso):- siList(T,verdadeiro),-X.
+
+siConj([],falso).
+siConj([X|T],falso):- siConj(T,falso), -X.
+siConj([X|T],desconhecido):- siConj(T,desconhecido), -X.
+siConj([X|T],desconhecido):- siConj(T,falso), nao(X), nao(-X).
+siConj([X|T],verdadeiro):- siConj(T,verdadeiro), -X.
+siConj([X|T],verdadeiro):- siConj(T,verdadeiro), nao(X), nao(-X).
+siConj([X|T],verdadeiro):- siConj(T,desconhecido), X.
+siConj([X|T],verdadeiro):- siConj(T,falso), X.
