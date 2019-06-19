@@ -95,38 +95,13 @@ interdito(interdito).
 %% O valor do id tem de ser inteiro e nao pode ser nao nulo
 +utente(IdUt,Nome,Idade,Morada) :: (nao(nulo(IdUt)),integer(IdUt)).
 
-+utente(IdUt,Nome,Idade,Morada) :: (
-    ou(
-        (
-            integer(Idade),
-            Idade \= 10
-        ),
-        nulo(Idade)
-    )
-).
 %% Não é possivel a inserção de conhecimento se esse conhecimento for interdito
 +utente(IdUt,Nome,Idade,Morada)::
-    ou(
-        interdito(Nome),
-        nao(utente(IdUt,interdito,Idade,Morada))
-    ).
+        nao(utente(IdUt,interdito,Idade,Morada)).
 +utente(IdUt,Nome,Idade,Morada)::
-    ou(
-        interdito(Idade),
-        nao(utente(IdUt,Nome,interdito,Morada))
-    ).
+        nao(utente(IdUt,Nome,interdito,Morada)).
 +utente(IdUt,Nome,Idade,Morada)::
-    ou(
-        interdito(Morada),
-        nao(utente(IdUt,Nome,Idade,interdito))
-    ).
-
-%% TODO: se o conhecimento for interdito na exceção não pode inserir valor como no caso de cima ^
-%% Ideia predicados nomeIncerto(Id), idadeIncerto(Id), moradaIncerto(Id) para todos os atributos
-    %%  nomeIncerto(IdUt):-utente(IdUt,interdito,Idade,Morada).
-    %%  +nomeIncerto(Id)::nao(nulo(Id)). 
-    %%  -nomeIncerto(Id). Para não ser possivel remover o predicado
-    %%  Invariante passa a +utente(IdUt,Nome,Idade,Morada)::nao(nomeIncerto(IdUt)),nao(idadeIncerto(IdUt)),nao(moradaIncerto(IdUt)).
+        nao(utente(IdUt,Nome,Idade,interdito)).
 
 
 %% Conhecimento positivo não pode ser negativo. 
@@ -140,24 +115,6 @@ interdito(interdito).
 %% A idade tem de ser um inteiro.
 +(-utente(IdUt,Nome,Idade,Morada))::(nao(nulo(Idade)),integer(Idade)).
 +(-utente(IdUt,Nome,Idade,Morada))::(nao(nulo(Morada))).
-
-%% Excecoes
-%% excecao(Utente(IdUt,Nome,Idade,Morada))
-%% As exceções que permitem várias combinações conhecimento interdito e incerto
-excecao(utente(Id,N,I,M)):-
-        utente(Id,NUL1,I,M), nulo(NUL1).
-excecao(utente(Id,N,I,M)):-
-        utente(Id,N,NUL2,M), nulo(NUL2).
-excecao(utente(Id,N,I,M)):-
-        utente(Id,N,I,NUL3), nulo(NUL3).
-excecao(utente(Id,N,I,M)):-
-        utente(Id,NUL1,NUL2,M), nulo(NUL1), nulo(NUL2).
-excecao(utente(Id,N,I,M)):-
-        utente(Id,NUL1,I,NUL3), nulo(NUL1), nulo(NUL3).
-excecao(utente(Id,N,I,M)):-
-        utente(Id,N,NUL2,NUL3), nulo(NUL2), nulo(NUL3).
-excecao(utente(Id,N,I,M)):-
-        utente(Id,NUL1,NUL2,NUL3), nulo(NUL1),nulo(NUL2),nulo(NUL3).
 
 %% Exemplos
 %% Exemplos de Conhecimento Positivo
@@ -191,10 +148,6 @@ excecao(utente(4,mario,braga,21)).
     %% No caso de mistura de conhecimento incerto ou interdito este é representado na exceção com _ (uma variável não unificada).
 excecao(utente(5,joaquim,_,braga)).
 excecao(utente(5,joaquim,_,guimaraes)).
-    %% TODO: No caso da idade ser interdita representamos da seguinte forma:
-        %% idadeInterdita(5)
-    %% Isto serve para, quando for feita uma atualização, prevenir a substituíção de valores interditos.
-
 
 %% Exemplo de predicado que adiciona várias exceções
 addUtentesImprecisos(Id,impreciso([X|T]),I,M):- addUtentesImprecisos(Id,X,I,M),addUtentesImprecisos(Id,impreciso(T),I,M).
@@ -223,20 +176,11 @@ addUtentesImprecisos(Id,N,I,M):- evolucaoExcecao(utente(Id,N,I,M)).
 
 %% Não é possivel a inserção de conhecimento se esse conhecimento for interdito
 +prestador(IdPrest,Nome,Especialidade,Instituicao)::
-    ou(
-        interdito(Nome),
-        nao(prestador(IdPrest,interdito,Especialidade,Instituicao))
-    ).
+        nao(prestador(IdPrest,interdito,Especialidade,Instituicao)).
 +prestador(IdPrest,Nome,Especialidade,Instituicao)::
-    ou(
-        interdito(Especialidade),
-        nao(prestador(IdPrest,Nome,interdito,Instituicao))
-    ).
+        nao(prestador(IdPrest,Nome,interdito,Instituicao)).
 +prestador(IdPrest,Nome,Especialidade,Instituicao)::
-    ou(
-        interdito(Instituicao),
-        nao(prestador(IdPrest,Nome,Especialidade,interdito))
-    ).
+        nao(prestador(IdPrest,Nome,Especialidade,interdito)).
 
 %% Conhecimento positivo não pode ser negativo. 
 +prestador(IdPrest,Nome,Especialidade,Instituicao)::nao(-prestador(IdPrest,Nome,Especialidade,Instituicao)).
@@ -266,23 +210,7 @@ addUtentesImprecisos(Id,N,I,M):- evolucaoExcecao(utente(Id,N,I,M)).
 +(-prestador(IdPrest,Nome,Especialidade,Instituicao))::nao(nulo(Especialidade)).
 +(-prestador(IdPrest,Nome,Especialidade,Instituicao))::nao(nulo(Instituicao)).
 
-%% Excecoes
-%% excecao(prestador(idPrest,Nome,Especialidade,Instituicao))
-%% As exceções que permitem várias combinações conhecimento interdito e incerto
-excecao(prestador(Id,N,E,Inst)):-
-        prestador(Id,NUL1,E,Inst), nulo(NUL1).
-excecao(prestador(Id,N,E,Inst)):-
-        prestador(Id,N,NUL2,Inst), nulo(NUL2).
-excecao(prestador(Id,N,E,Inst)):-
-        prestador(Id,N,E,NUL3), nulo(NUL3).
-excecao(prestador(Id,N,E,Inst)):-
-        prestador(Id,NUL1,NUL2,Inst), nulo(NUL1), nulo(NUL2).
-excecao(prestador(Id,N,E,Inst)):-
-        prestador(Id,NUL1,E,NUL3), nulo(NUL1), nulo(NUL3).
-excecao(prestador(Id,N,E,Inst)):-
-        prestador(Id,N,NUL2,NUL3), nulo(NUL2), nulo(NUL3).
-excecao(prestador(Id,N,E,Inst)):-
-        prestador(Id,NUL1,NUL2,NUL3), nulo(NUL1),nulo(NUL2),nulo(NUL3).
+
 
 %%TODO Exemplos
 %% Exemplos de Conhecimento Positivo
@@ -326,10 +254,7 @@ excecao(prestador(4,antonio,oftalmologia,hospitallisboa)).
                         ).
 %% Não é possivel a inserção de conhecimento se esse conhecimento for interdito
 +cuidado(Data,IdUt,IdPrest,Descricao,Custo)::
-    ou(
-        interdito(Custo),
-        nao(cuidado(Data,IdUt,IdPrest,Descricao,interdito))
-    ).
+        nao(cuidado(Data,IdUt,IdPrest,Descricao,interdito)).
 
 %% Conhecimento positivo não pode ser negativo. 
 +cuidado(Data,IdUt,IdPrest,Descricao,Custo)::nao(-cuidado(Data,IdUt,IdPrest,Descricao,Custo)).
@@ -345,40 +270,6 @@ excecao(prestador(4,antonio,oftalmologia,hospitallisboa)).
 +(-cuidado(Data,IdUt,IdPrest,Descricao,Custo))::nao(nulo(Descricao)).
 +(-cuidado(Data,IdUt,IdPrest,Descricao,Custo))::nao(nulo(Custo)).
 
-
-%Exceções por causa de interditos.
-excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
-        cuidado(NUL1,IdUt,IdPrest,Descricao,Custo), nulo(NUL1).
-excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
-        cuidado(Data,NUL2,IdPrest,Descricao,Custo), nulo(NUL2).
-excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
-        cuidado(Data,IdUt,NUL3,Descricao,Custo), nulo(NUL3).
-excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
-        cuidado(Data,IdUt,IdPrest,Descricao,NUL4), nulo(NUL4).
-
-excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
-        cuidado(NUL1,NUL2,IdPrest,Descricao,Custo), nulo(NUL1), nulo(NUL2).
-excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
-        cuidado(NUL1,IdUt,NUL3,Descricao,Custo), nulo(NUL1), nulo(NUL3).
-excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
-        cuidado(NUL1,IdUt,IdPrest,Descricao,NUL4), nulo(NUL1), nulo(NUL4).
-
-excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
-        cuidado(Data,NUL2,NUL3,Descricao,Custo), nulo(NUL2), nulo(NUL3).
-excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
-        cuidado(Data,NUL2,IdPrest,Descricao,NUL4), nulo(NUL2), nulo(NUL4).
-
-excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
-        cuidado(Data,IdUt,NUL3,Descricao,NUL4), nulo(NUL3), nulo(NUL4).
-
-excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
-        cuidado(NUL1,NUL2,NUL3,Descricao,Custo), nulo(NUL1), nulo(NUL2), nulo(NUL3).
-excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
-        cuidado(NUL1,IdUt,NUL3,Descricao,NUL4), nulo(NUL1), nulo(NUL3), nulo(NUL4).
-excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
-        cuidado(NUL1,NUL2,IdPrest,Descricao,NUL4), nulo(NUL1), nulo(NUL2), nulo(NUL4).
-excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):-
-        cuidado(Data,NUL2,NUL3,Descricao,NUL4), nulo(NUL2), nulo(NUL3), nulo(NUL4).
         
 %% Exemplos
 %% Exemplos de Conhecimento Positivo
