@@ -211,14 +211,6 @@ excecao(prestador(4,antonio,oftalmologia,hospitallisboa)).
 %%% Inserção de Conhecimento
 +prestador(IdPrest,Nome,Especialidade,Instituicao) :: (nao(nulo(IdPrest)),integer(IdPrest)).
 
-%% Não é possivel a inserção de conhecimento se esse conhecimento for interdito
-+prestador(IdPrest,Nome,Especialidade,Instituicao)::
-        nao(prestador(IdPrest,interdito,Especialidade,Instituicao)).
-+prestador(IdPrest,Nome,Especialidade,Instituicao)::
-        nao(prestador(IdPrest,Nome,interdito,Instituicao)).
-+prestador(IdPrest,Nome,Especialidade,Instituicao)::
-        nao(prestador(IdPrest,Nome,Especialidade,interdito)).
-
 %% Conhecimento positivo não pode ser negativo. 
 +prestador(IdPrest,Nome,Especialidade,Instituicao)::nao(-prestador(IdPrest,Nome,Especialidade,Instituicao)).
 
@@ -247,25 +239,8 @@ excecao(prestador(4,antonio,oftalmologia,hospitallisboa)).
 +(-prestador(IdPrest,Nome,Especialidade,Instituicao))::nao(nulo(Especialidade)).
 +(-prestador(IdPrest,Nome,Especialidade,Instituicao))::nao(nulo(Instituicao)).
 
-
-%Invariante
-+cuidado(Data,IdUt,IdPrest,Descricao,Custo)::
-        (nulo(NUL1), nulo(NUL2), nulo(NUL3), nulo(NUL4), nao( cuidado(NUL1,NUL2,NUL3,Descricao,NUL4))).
-
--cuidado(Data,IdUt,IdPrest,Descricao,Custo)::(
-                        nao(interdito(Descricao)),
-                        nao(interdito(Custo))
-                        ).
-%% Não é possivel a inserção de conhecimento se esse conhecimento for interdito
-+cuidado(Data,IdUt,IdPrest,Descricao,Custo)::
-        nao(cuidado(Data,IdUt,IdPrest,Descricao,interdito)).
-
 %% Conhecimento positivo não pode ser negativo. 
 +cuidado(Data,IdUt,IdPrest,Descricao,Custo)::nao(-cuidado(Data,IdUt,IdPrest,Descricao,Custo)).
-
-%%% Remoção de Conhecimento
-%Tens uma em cima, mas não tem nulos nas PK
-%%-(cuidado(Data,IdUt,IdPrest,Descricao,Custo))::(nao(interdito(Data)),nao(interdito(IdUt)), nao(interdito(IdPrest)), nao(interdito(Custo))).
 
 %% Não se pode adicionar conhecimento negativo com nulos. 
 +(-cuidado(Data,IdUt,IdPrest,Descricao,Custo))::nao(nulo(Data)).
