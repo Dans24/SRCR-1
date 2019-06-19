@@ -153,6 +153,32 @@ excecao(utente(6,gustavo,Idade,_)):- Idade<40, Idade>=30.
                     comprimento( S,N ), N == 0 
                   ).
 
+
+%% Exemplos de Conhecimento Positivo
+    %% O prestador juan especializa-se em ortopedia no hospital de braga
+prestador(1,juan,ortopedia,hospitalbraga).
+
+%% Exemplos de Conhecimento Negativo
+    %% Sabe-se que o carlos não trabalha no hospital do porto
+-prestador(2,carlos,_,hospitalporto).
+
+%% Exemplo de conhecimento Incerto
+    %% O prestador 2 carlos presta consultas de nutrição, não se sabe no entanto em que local
+prestador(2,carlos,nutricao,incerto).
+excecao(prestador(IdUt,Nome,Especialidade,Local)):- prestador(IdUt,Nome,Especialidade,incerto).
+
+%% Exemplo de conhecimento Interdito
+    %% Por motivos judiciais é impossivel aceder ao nome do prestador 3
+        %% Este prestador especializa-se em cirurgia geral no hospital da beira
+prestador(3,interdito,cirurgiageral,hospitalbeira).
+
+%% Exemplo de conhecimento Impreciso
+    %% Houve uma corrupção no sistema de dados.
+    %% Por causa disto é impossivel determinar se o prestador antonio se especializa em Oncologia ou Oftalmologia.
+    %% Sabe-se que o servico é prestado em lisboa. 
+excecao(prestador(4,antonio,oncologia,hospitallisboa)).
+excecao(prestador(4,antonio,oftalmologia,hospitallisboa)).
+
 %%--------------------------------------------------------------------------------------------------------
 
 %% Manipular invariantes que designem restrições à inserção e à remoção de conhecimento do sistema;
@@ -181,31 +207,6 @@ ilhas(madeira).
 ilhas(acores).
 +utente(IdUt,Nome,Idade,Morada)::(nao(ilhas(Morada))).
 
-%%TODO Exemplos
-%% Exemplos de Conhecimento Positivo
-    %% O prestador juan especializa-se em ortopedia no hospital de braga
-prestador(1,juan,ortopedia,hospitalbraga).
-
-%% Exemplos de Conhecimento Negativo
-    %% Sabe-se que o carlos não trabalha no hospital do porto
--prestador(2,carlos,_,hospitalporto).
-
-%% Exemplo de conhecimento Incerto
-    %% O prestador 2 carlos presta consultas de nutrição, não se sabe no entanto em que local
-prestador(2,carlos,nutricao,incerto).
-excecao(prestador(IdUt,Nome,Especialidade,Local)):- prestador(IdUt,Nome,Especialidade,incerto).
-
-%% Exemplo de conhecimento Interdito
-    %% Por motivos judiciais é impossivel aceder ao nome do prestador 3
-        %% Este prestador especializa-se em cirurgia geral no hospital da beira
-prestador(3,interdito,cirurgiageral,hospitalbeira).
-
-%% Exemplo de conhecimento Impreciso
-    %% Houve uma corrupção no sistema de dados.
-    %% Por causa disto é impossivel determinar se o prestador antonio se especializa em Oncologia ou Oftalmologia.
-    %% Sabe-se que o servico é prestado em lisboa. 
-excecao(prestador(4,antonio,oncologia,hospitallisboa)).
-excecao(prestador(4,antonio,oftalmologia,hospitallisboa)).
 
 %% Invariantes
 %%% Inserção de Conhecimento
