@@ -13,44 +13,6 @@ isExcecao(excecao(T)).
 comprimento( S,N ) :-
     length( S,N ).
 
-%% Sistema de evolução de conhecimento
-teste([]).
-teste([I|T]):- I,teste(T).
-
-remocao(T):- retract(T).
-remocao(T):- assert(T), !, fail.
-
-insercao(T):- assert(T).
-insercao(T):- retract(T),!,fail.
-
-
-
-%% Improved Evolucao
-%% Os termos dentro da exceção tem de respeitar os invariantes 
-evolucaoExcecao(T):-
-            findall(Invariante, +excecao(T)::Invariante, Lista),
-            findall(Invariante, +T::Invariante, Lista2),
-            insercao(excecao(T)),
-            teste(Lista),
-            teste(Lista2).
-
-evolucao(T):-
-            findall(Invariante, +T::Invariante, Lista),
-            insercao(T),
-            teste(Lista).
-
-%% Os termos dentro da exceção tem de respeitar os invariantes
-involucao(excecao(T)):- 
-            findall(Invariante, -T :: Invariante, Lista),
-            remocao(excecao(T)),
-            teste(Lista).
-
-involucao(T):- 
-            nao(isExcecao(T)),
-            findall(Invariante, -T :: Invariante, Lista),
-            remocao(T),
-            teste(Lista).
-
 
 
 :- dynamic excecao/1.
@@ -92,11 +54,24 @@ utente(1,jorge,25,braga).
         nao(prestador(IdPrest,Nome,Especialidade,Instituicao)),
         nao(excecao(prestador(IdPrest,Nome,Especialidade,Instituicao))).
 
+%% Exemplos de Conhecimento Positivo
+    %% O prestador juan especializa-se em ortopedia no hospital de braga
+prestador(1,juan,ortopedia,hospitalbraga).
+
+%% Exemplos de Conhecimento Negativo
+    %% Sabe-se que o carlos não trabalha no hospital do porto
+-prestador(2,carlos,_,hospitalporto).
+
+
 %Cuidado
     %% cuidado(Data,IdUt,IdPrest,Descricao,Custo)
 :- dynamic cuidado/5.
 
 %% Descrição não pode ser nula. Pode ser vazia.
+-cuidado(Data,IdUt,IdPrest,Descricao,Custo):-
+        nao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)),
+        nao(excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo))).
+
 
 %%--------------------------------------------------------------------------------------------------------
 
@@ -154,14 +129,6 @@ excecao(utente(6,gustavo,Idade,_)):- Idade<40, Idade>=30.
                   ).
 
 
-%% Exemplos de Conhecimento Positivo
-    %% O prestador juan especializa-se em ortopedia no hospital de braga
-prestador(1,juan,ortopedia,hospitalbraga).
-
-%% Exemplos de Conhecimento Negativo
-    %% Sabe-se que o carlos não trabalha no hospital do porto
--prestador(2,carlos,_,hospitalporto).
-
 %% Exemplo de conhecimento Incerto
     %% O prestador 2 carlos presta consultas de nutrição, não se sabe no entanto em que local
 prestador(2,carlos,nutricao,incerto).
@@ -171,6 +138,13 @@ excecao(prestador(IdUt,Nome,Especialidade,Local)):- prestador(IdUt,Nome,Especial
     %% Por motivos judiciais é impossivel aceder ao nome do prestador 3
         %% Este prestador especializa-se em cirurgia geral no hospital da beira
 prestador(3,interdito,cirurgiageral,hospitalbeira).
++prestador(IdUt,Nome,Especialidade,Local) :: (
+                    findall(
+                        (IdUt,NS,Especialidade,Local),
+                        (utente(3,NS,cirurgiageral,hospitalbeira), nao(interdito(NS))),
+                        S ),
+                    comprimento( S,N ), N == 0 
+                  ).
 
 %% Exemplo de conhecimento Impreciso
     %% Houve uma corrupção no sistema de dados.
@@ -178,6 +152,35 @@ prestador(3,interdito,cirurgiageral,hospitalbeira).
     %% Sabe-se que o servico é prestado em lisboa. 
 excecao(prestador(4,antonio,oncologia,hospitallisboa)).
 excecao(prestador(4,antonio,oftalmologia,hospitallisboa)).
+
+%% TODO Mistura de Conhecimento
+
+
+%cuidado(Data,IdUt,IdPrest,Descricao,Custo)
+%% Exemplo de conhecimento Incerto
+    %% O valor pago na consulta 3 administrada pelo prestador 2 ao utente 1 no dia 3
+cuidado(3,1,2,"utente perdeu 2 kilos desde a ultima consulta",incerto).
+excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):- cuidado(Data,IdUt,IdPrest,Descricao,incerto).
+
+%% Exemplo de conhecimento Interdito
+    %% A descrição do cuidado ... é interdita
+cuidado(25,2,3,interdito,250)
++cuidado(Data,IdUt,IdPrest,Descricao,Custo) :: (
+                    findall(
+                        (Data,IdUt,IdPrest,DS,Custo),
+                        (cuidado(25,2,3,DS,250), nao(interdito(DS))),
+                        S ),
+                    comprimento( S,N ), N == 0 
+                  ).
+
+%% Exemplo de conhecimento Impreciso
+    %% A pessoa responsável pelo registo dos cuidados não percebeu qual o cuidado que ia ser administrado ao utente
+    %% Por causa disto não se sabe se o cuidado administrado no dia 5 foi do prestador 1 ou 3
+excecao(cuidado(5,2,3,descricao,300)).
+excecao(cuidado(5,2,1,descricao,300)).
+
+%% TODO mais alguns exemplos
+%% TODO Mistura de conhecimento
 
 %%--------------------------------------------------------------------------------------------------------
 
@@ -187,7 +190,6 @@ excecao(prestador(4,antonio,oftalmologia,hospitallisboa)).
 %%% Inserção de Conhecimento
 %% O valor do id tem de ser inteiro e nao pode ser nao nulo
 +utente(IdUt,Nome,Idade,Morada) :: (nao(nulo(IdUt)),integer(IdUt)).
-
 
 %% Conhecimento positivo não pode ser negativo. 
 +utente(IdUt,Nome,Idade,Morada)::nao(-utente(IdUt,Nome,Idade,Morada)).
@@ -221,7 +223,6 @@ ilhas(acores).
 +(-prestador(IdPrest,Nome,Especialidade,Instituicao))::(nao(nulo(Especialidade)),integer(Idade)).
 +(-prestador(IdPrest,Nome,Especialidade,Instituicao))::(nao(nulo(Instituicao))).
 
-    %%TODO Excecao interdito coisas
 %%TODO invariantes negativos
 -prestador(IdPrest,Nome,Especialidade,Instituicao)::(
                                         nao(interdito(Nome)),
@@ -250,9 +251,52 @@ ilhas(acores).
 +(-cuidado(Data,IdUt,IdPrest,Descricao,Custo))::nao(nulo(Descricao)).
 +(-cuidado(Data,IdUt,IdPrest,Descricao,Custo))::nao(nulo(Custo)).
 
+%% O custo de um cuidado tem de ser positivo
+positivo(N):- integer(N), N>0.
+positivo(N):- integer(N), N>0.
+positivo(Nulo):- integer(N), N>0.
+
 %%--------------------------------------------------------------------------------------------------------
 
 %% Lidar com a problemática da evolução do conhecimento, criando os procedimentos adequados;
+
+%% Sistema de evolução de conhecimento
+teste([]).
+teste([I|T]):- I,teste(T).
+
+remocao(T):- retract(T).
+remocao(T):- assert(T), !, fail.
+
+insercao(T):- assert(T).
+insercao(T):- retract(T),!,fail.
+
+
+%% Improved Evolucao
+%% Os termos dentro da exceção tem de respeitar os invariantes 
+evolucaoExcecao(T):-
+            findall(Invariante, +excecao(T)::Invariante, Lista),
+            findall(Invariante, +T::Invariante, Lista2),
+            insercao(excecao(T)),
+            teste(Lista),
+            teste(Lista2).
+
+evolucao(T):-
+            findall(Invariante, +T::Invariante, Lista),
+            insercao(T),
+            teste(Lista).
+
+%% Os termos dentro da exceção tem de respeitar os invariantes
+involucao(excecao(T)):- 
+            findall(Invariante, -T :: Invariante, Lista),
+            remocao(excecao(T)),
+            teste(Lista).
+
+involucao(T):- 
+            nao(isExcecao(T)),
+            findall(Invariante, -T :: Invariante, Lista),
+            remocao(T),
+            teste(Lista).
+
 
 %% Exemplo de predicado que adiciona várias exceções
 addUtentesImprecisos(Id,impreciso([X|T]),I,M):- addUtentesImprecisos(Id,X,I,M),addUtentesImprecisos(Id,impreciso(T),I,M).
@@ -289,14 +333,14 @@ xor(T1,T2):- -T1,T2.
 -xor(T1,T2):- T1,T2.
 -xor(T1,T2):- -T1,-T2.
 
-siList([],verdadeiro).
-siList([X|T],verdadeiro):- siList(T,verdadeiro), X.
-siList([X|T],desconhecido):- siList(T,desconhecido), X.
-siList([X|T],desconhecido):- siList(T,verdadeiro), nao(X), nao(-X).
-siList([X|T],falso):- siList(T,falso), X.
-siList([X|T],falso):- siList(T,falso), nao(X), nao(-X).
-siList([X|T],falso):- siList(T,desconhecido),-X.
-siList([X|T],falso):- siList(T,verdadeiro),-X.
+siDisj([],verdadeiro).
+siDisj([X|T],verdadeiro):- siDisj(T,verdadeiro), X.
+siDisj([X|T],desconhecido):- siDisj(T,desconhecido), X.
+siDisj([X|T],desconhecido):- siDisj(T,verdadeiro), nao(X), nao(-X).
+siDisj([X|T],falso):- siDisj(T,falso), X.
+siDisj([X|T],falso):- siDisj(T,falso), nao(X), nao(-X).
+siDisj([X|T],falso):- siDisj(T,desconhecido),-X.
+siDisj([X|T],falso):- siDisj(T,verdadeiro),-X.
 
 siConj([],falso).
 siConj([X|T],falso):- siConj(T,falso), -X.
