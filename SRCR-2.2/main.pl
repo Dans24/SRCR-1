@@ -16,6 +16,8 @@ bool(true).
 
 isExcecao(excecao(T)).
 
+comprimento( S,N ) :-
+    length( S,N ).
 
 %% Sistema de evolução de conhecimento
 teste([]).
@@ -95,14 +97,6 @@ interdito(interdito).
 %% O valor do id tem de ser inteiro e nao pode ser nao nulo
 +utente(IdUt,Nome,Idade,Morada) :: (nao(nulo(IdUt)),integer(IdUt)).
 
-%% Não é possivel a inserção de conhecimento se esse conhecimento for interdito
-+utente(IdUt,Nome,Idade,Morada)::
-        nao(utente(IdUt,interdito,Idade,Morada)).
-+utente(IdUt,Nome,Idade,Morada)::
-        nao(utente(IdUt,Nome,interdito,Morada)).
-+utente(IdUt,Nome,Idade,Morada)::
-        nao(utente(IdUt,Nome,Idade,interdito)).
-
 
 %% Conhecimento positivo não pode ser negativo. 
 +utente(IdUt,Nome,Idade,Morada)::nao(-utente(IdUt,Nome,Idade,Morada)).
@@ -129,11 +123,20 @@ utente(1,jorge,25,braga).
 %% Exemplo de conhecimento Incerto
     %% O utente 2 chama-se Maria e mora em guimaraes. A sua idade é incerta, uma vez que não se pergunta a idade a uma senhora
 utente(2,maria,incerto,guimaraes).
+excecao(utente(2,maria,_,guimaraes)).
 
 %% Exemplo de conhecimento Interdito
     %% Por motivos confidencais o nome do utente 3 não pode ser acedido
         %% Este utente tem 34 anos e mora atualmente em Turim.
 utente(3,interdito,34,turim).
++utente(IdUt,Nome,Idade,Morada) :: (
+                    findall(
+                        (IdUt,NS,Idade,Morada),
+                        (utente(3,NS,34,turim), nao(interdito(NS))),
+                        S ),
+                    comprimento( S,N ), N == 0 
+                  ).
+excecao(IdUt,Nome,Idade,Morada):- utente(IdUt,interdito,Idade,Morada).
 
 %% Exemplo de conhecimento Impreciso
     %% Houve uma corrupção no sistema de dados.
@@ -143,11 +146,23 @@ utente(3,interdito,34,turim).
 excecao(utente(4,marco,braga,21)).
 excecao(utente(4,mario,braga,21)).
 
-%% Mistura de conhecimento Impreciso+(Interdito/Incerto)
+%% Mistura de conhecimento Impreciso+Incerto
     %% O utente numero 5 Joaquim tem a idade incerta e, devido a mudanças de habitação não se sabe se este mora em braga ou em guimaraes
     %% No caso de mistura de conhecimento incerto ou interdito este é representado na exceção com _ (uma variável não unificada).
 excecao(utente(5,joaquim,_,braga)).
 excecao(utente(5,joaquim,_,guimaraes)).
+
+%% Mistura de conhecimento Impreciso+Interdito
+    %% Sabe-se que a idade do utente 6 Gustavo está entre o intervalo [30,40[
+    %% Por motivos alheios a sua morada está interdita
+excecao(utente(6,gustavo,Idade,interdito)):- Idade<40, Idade>=30.
++utente(IdUt,Nome,Idade,Morada) :: (
+                    findall(
+                        (IdUt,Nome,Idade,MS),
+                        (utente(6,gustavo,Idade,MS), nao(interdito(MS))),
+                        S ),
+                    comprimento( S,N ), N == 0 
+                  ).
 
 %% Exemplo de predicado que adiciona várias exceções
 addUtentesImprecisos(Id,impreciso([X|T]),I,M):- addUtentesImprecisos(Id,X,I,M),addUtentesImprecisos(Id,impreciso(T),I,M).
@@ -224,6 +239,7 @@ prestador(1,juan,ortopedia,hospitalbraga).
 %% Exemplo de conhecimento Incerto
     %% O prestador 2 carlos presta consultas de nutrição, não se sabe no entanto em que local
 prestador(2,carlos,nutricao,incerto).
+excecao(prestador(IdUt,Nome,Especialidade,Local)):- prestador(IdUt,Nome,Especialidade,incerto).
 
 %% Exemplo de conhecimento Interdito
     %% Por motivos judiciais é impossivel aceder ao nome do prestador 3
