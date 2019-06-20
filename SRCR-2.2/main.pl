@@ -203,11 +203,17 @@ interdito(interdito).
     +prestador(IdPrest,Nome,Especialidade,Instituicao) :: (
                         findall(
                             (IdPrest,NS,Especialidade,Instituicao),
-                            (prestador(6,incerto,Especialidade,Instituicao), nao(interdito(Especialidade)), nao(interdito(Instituicao))),
+                            (prestador(6,incerto,Especialidade,Instituicao), nao(interdito(Especialidade))),
                             S ),
                         comprimento( S,N ), N == 0 
                     ).
-
+    +prestador(IdPrest,Nome,Especialidade,Instituicao) :: (
+                        findall(
+                            (IdPrest,NS,Especialidade,Instituicao),
+                            (prestador(6,incerto,Especialidade,Instituicao), nao(interdito(Instituicao))),
+                            S ),
+                        comprimento( S,N ), N == 0 
+                    ).
 
 % Cuidado -----------------------------------------------------------------------
 
@@ -308,7 +314,8 @@ interdito(interdito).
 % Prestador -----------------------------------------------------------------------
 
     %% Inserção de Conhecimento
-    
+        %Isto torna os invariantes do interdito inutil
+        %+prestador(IdPrest, _, _, _) :: (findall(IdPrest, (prestador(IdPrest, _,_,_)), R), comprimento(R,1)).
         %
         +prestador(IdPrest,Nome,Especialidade,Instituicao) :: (nao(nulo(IdPrest)),integer(IdPrest)).
 
