@@ -66,7 +66,7 @@ interdito(interdito).
 
     %% Exemplos de Conhecimento Negativo
         %% Sabe-se que o carlos não trabalha no hospital do porto
-    -prestador(2,carlos,genecologista,hospitalporto).
+    -prestador(2,carlos,nutricao,hospitalporto).
 
 
 % Cuidado -----------------------------------------------------------------------
@@ -86,7 +86,7 @@ interdito(interdito).
 
     %% Exemplos de Conhecimento Negativo
         %% O prestador Carlos(2) nunca participou num cuidado com o utente Jorge(1) no ano 2018.
-    -prestador(_,_,2018,1,2,_,_).
+    -cuidado(_,_,2018,1,2,_,_).
 
 
 
@@ -98,7 +98,8 @@ interdito(interdito).
 % Utente -----------------------------------------------------------------------
 
     %% Exemplo de conhecimento Incerto
-    %% O utente 2 chama-se Maria e mora em guimaraes. A sua idade é incerta, uma vez que não se pergunta a idade a uma senhora
+    %% O utente 2 chama-se Maria e mora em guimaraes. 
+    %% A sua idade é incerta, uma vez que não se pergunta a idade a uma senhora
     utente(2,maria,incerto,guimaraes).
     excecao(utente(IdUt,Nome,Idade,Morada)):- utente(IdUt,Nome,incerto,Morada).
 
@@ -134,8 +135,8 @@ interdito(interdito).
     %% Mistura de conhecimento Impreciso+Incerto
     %% O utente numero 5 Joaquim tem a idade incerta e, devido a mudanças de habitação não se sabe se este mora em braga ou em guimaraes
     %% No caso de mistura de conhecimento incerto ou interdito este é representado na exceção com _ (uma variável não unificada).
-    excecao(utente(5,joaquim,incerto,braga)).
-    excecao(utente(5,joaquim,incerto,guimaraes)).
+    excecao(utente(5,joaquim,_,braga)).
+    excecao(utente(5,joaquim,_,guimaraes)).
 
     %% Mistura de conhecimento Impreciso+Interdito
     %% Sabe-se que a idade do utente 6 Gustavo está entre o intervalo [30,40[
@@ -196,12 +197,13 @@ interdito(interdito).
 
 %%Exemplo de conhecimento Incerto+Interdito
     %% Houve uma falha no sistema
-    %% Não é possível determinar o nome do prestador, sendo que são interditas a sua especialidade e instituição 
-    excecao(prestador(6,_,_,_)).
+    %% Não é possível determinar o nome do prestador, sendo que são interditas a sua especialidade e instituição
+    prestador(6,incerto,interdito,interdito).
+    excecao(prestador(IdPrest,Nome,Especialidade,Instituicao)):- prestador(IdPrest,incerto,interdito,interdito). 
     +prestador(IdPrest,Nome,Especialidade,Instituicao) :: (
                         findall(
                             (IdPrest,NS,Especialidade,Instituicao),
-                            (prestador(6,NS,Especialidade,Instituicao), nao(interdito(Especialidade)), nao(interdito(Instituicao))),
+                            (prestador(6,incerto,Especialidade,Instituicao), nao(interdito(Especialidade)), nao(interdito(Instituicao))),
                             S ),
                         comprimento( S,N ), N == 0 
                     ).
@@ -211,26 +213,26 @@ interdito(interdito).
 
 %% Exemplo de conhecimento Incerto
     %% O valor pago na consulta administrada pelo prestador 2 ao utente 1 no dia 3 de junho de 2019
-    cuidado(3,6,2019,1,2,"utente perdeu 2 kilos desde a ultima consulta",incerto).
-    excecao(cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)):- cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,incerto).
+    cuidado(1,3,6,2019,1,2,"utente perdeu 2 kilos desde a ultima consulta",incerto).
+    excecao(cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)):- cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,incerto).
 
 %% Exemplo de conhecimento Interdito
     %% A descrição do cuidado ... é interdita
-    cuidado(25,4,2018,2,3,interdito,250).
-    +cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo) :: (
+    cuidado(2,25,4,2018,2,3,interdito,250).
+    +cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo) :: (
                         findall(
-                            (Dia,Mes,Ano,IdUt,IdPrest,DS,Custo),
-                            (cuidado(25,4,2018,2,3,DS,250), nao(interdito(DS))),
+                            (IdC,Dia,Mes,Ano,IdUt,IdPrest,DS,Custo),
+                            (cuidado(2,25,4,2018,2,3,DS,250), nao(interdito(DS))),
                             S ),
                         comprimento( S,N ), N == 0 
                     ).
-    excecao(cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)):- cuidado(Dia,Mes,Ano,IdUt,IdPrest,interdito,Custo).
+    excecao(cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)):- cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,interdito,Custo).
 
 %% Exemplo de conhecimento Impreciso
     %% A pessoa responsável pelo registo dos cuidados não percebeu qual o cuidado que ia ser administrado ao utente
     %% Por causa disto não se sabe se o cuidado administrado no dia 5 de agosto de 2017 foi do prestador 1 ou 3
-    excecao(cuidado(5,8,2018,2,3,descricao,300)).
-    excecao(cuidado(5,8,2018,2,1,descricao,300)).
+    excecao(cuidado(3,5,8,2018,2,3,descricao,300)).
+    excecao(cuidado(3,5,8,2018,2,1,descricao,300)).
 
 %% TODO mais alguns exemplos
 
@@ -243,23 +245,23 @@ interdito(interdito).
     %% porém é sabido que se ocorreu em abril não pode ter sido no dia 25 e se foi em junho não pode ter sido no dia 10, pois são feriados. 
     %% O ano foi 2019.
     %% O custo foi inferior a 500 euros, mas não pode ter sido de graça.
-    excecao(cuidado(Dia,Mes,2017,2,3,"",Custo)) :- Mes =:= 4, Dia >= 10, Dia =< 30, Dia \= 25, Custo < 500, Custo \= 0.
-    excecao(cuidado(Dia,Mes,2017,2,3,"",Custo)) :- Mes =:= 6, Dia > 10, Dia =< 30, Custo < 500, Custo \= 0.
+    excecao(cuidado(4,Dia,Mes,2017,2,3,"",Custo)) :- Mes =:= 4, Dia >= 10, Dia =< 30, Dia \= 25, Custo < 500, Custo \= 0.
+    excecao(cuidado(4,Dia,Mes,2017,2,3,"",Custo)) :- Mes =:= 6, Dia > 10, Dia =< 30, Custo < 500, Custo \= 0.
 
 %% TODO Mistura de conhecimento
 
 %% !! Não me lembro se podemos ter tipos de conhecimentos diferentes na PK
 %% Exemplo de Mistura de conhecimento Incerto+Interdito+Impreciso
-    %% Foi realizada um intervenção de urgência a uma figura muito relevante na sociedade portuguesa e a pedido
+    %% Foi realizada uma intervenção de urgência a uma figura muito relevante na sociedade portuguesa e a pedido
     %% dessa mesma ela não pode estar associada a este registo de consulta.
     %% Sabe-se que o custo ou foi de 500 euros ou então está entre os 1000 e os 2000 euros.
     %% A consulta foi realizada no mes de janeiro em 2009. O dia da consulta é incerto.
-    excecao(cuidado(_,1,2009,_,2, "utente mostra sinais de abuso", Custo)) :- Custo =:= 500. 
-    excecao(cuidado(_,1,2009,_,2, "utente mostra sinais de abuso", Custo)) :- Custo >= 1000, Custo =< 2000.
-    +cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo) :: (
+    excecao(cuidado(5,_,1,2009,_,2, "utente mostra sinais de abuso", Custo)) :- Custo =:= 500. 
+    excecao(cuidado(5,_,1,2009,_,2, "utente mostra sinais de abuso", Custo)) :- Custo >= 1000, Custo =< 2000.
+    +cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo) :: (
                         findall(
-                            (Dia,Mes,Ano,IdUt,IdPrest,DS,Custo),
-                            (cuidado(Dia,1,2009,IdUt,2,"utente mostra sinais de abuso",Custo), nao(interdito(IdUt))),
+                            (5,Dia,Mes,Ano,IdUt,IdPrest,DS,Custo),
+                            (cuidado(5,Dia,Mes,Ano,IdUt,IdPrest,DS,Custo), nao(interdito(IdUt))),
                             S ),
                         comprimento( S,N ), N == 0 
                     ).
@@ -337,24 +339,25 @@ interdito(interdito).
 % Cuidado -----------------------------------------------------------------------
 
     %% Conhecimento positivo não pode ser negativo. 
-    +cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(-cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)).
-    +(-cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)).
+    +cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(-cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)).
+    +(-cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)).
 
     %% Não se pode adicionar conhecimento negativo com nulos. 
-    +(-cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(nulo(Dia)).
-    +(-cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(nulo(Mes)).
-    +(-cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(nulo(Ano)).
-    +(-cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(nulo(IdUt)).
-    +(-cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(nulo(IdPrest)).
-    +(-cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(nulo(Descricao)).
-    +(-cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(nulo(Custo)).
+    +(-cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(nulo(IdC)).
+    +(-cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(nulo(Dia)).
+    +(-cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(nulo(Mes)).
+    +(-cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(nulo(Ano)).
+    +(-cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(nulo(IdUt)).
+    +(-cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(nulo(IdPrest)).
+    +(-cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(nulo(Descricao)).
+    +(-cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(nulo(Custo)).
 
     %% O custo de um cuidado tem de ser positivo
 
     positivo(N):- integer(N), N>0.
     positivo(incerto).
     positivo(interdito).
-    +cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::(positivo(Custo)).
+    +cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::(positivo(Custo)).
 
 
 
@@ -374,6 +377,10 @@ interdito(interdito).
     insercao(T):- assert(T).
     insercao(T):- retract(T),!,fail.
 
+    removeTodos([X|T]):-remocao(X),removeTodos(T).
+    removeTodos([]).
+    removeHead([]).
+    removeHead([S|T]):- remocao(S).
 
 %% Improved Evolucao
     %% Os termos dentro da exceção tem de respeitar os invariantes 
@@ -386,12 +393,6 @@ interdito(interdito).
     evolucao(T):-
                 findall(Invariante, +T::Invariante, Lista),
                 insercao(T),
-                teste(Lista).
-
-    %% Os termos dentro da exceção tem de respeitar os invariantes
-    involucao(excecao(T)):- 
-                findall(Invariante, -T :: Invariante, Lista),
-                remocao(excecao(T)),
                 teste(Lista).
 
     involucao(T):- 
@@ -445,47 +446,76 @@ interdito(interdito).
 
     % Cuidado -----------------------------------------------------------------------
 
-        evolucaoCuidadoImprecisos(Dia,Mes,Ano,impreciso([X|T]),IdPrest,Descricao,Custo):- 
-            evolucaoCuidadoImprecisos(Dia,Mes,Ano,X,IdPrest,Descricao,Custo),
-            evolucaoCuidadoImprecisos(Dia,Mes,Ano,impreciso(T),IdPrest,Descricao,Custo).
+        evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,impreciso([X|T]),IdPrest,Descricao,Custo):- 
+            evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,X,IdPrest,Descricao,Custo),
+            evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,impreciso(T),IdPrest,Descricao,Custo).
 
-        evolucaoCuidadoImprecisos(Dia,Mes,Ano,impreciso([]),IdPrest,Descricao,Custo).
+        evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,impreciso([]),IdPrest,Descricao,Custo).
 
-        evolucaoCuidadoImprecisos(Dia,Mes,Ano,IdUt,impreciso([X|T]),Descricao,Custo):-
-            evolucaoCuidadoImprecisos(Dia,Mes,Ano,IdUt,X,Descricao,Custo),
-            evolucaoCuidadoImprecisos(Dia,Mes,Ano,IdUt,impreciso(T),Descricao,Custo).
+        evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,IdUt,impreciso([X|T]),Descricao,Custo):-
+            evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,IdUt,X,Descricao,Custo),
+            evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,IdUt,impreciso(T),Descricao,Custo).
 
-        evolucaoCuidadoImprecisos(Dia,Mes,Ano,IdUt,impreciso([]),Descricao,Custo).
+        evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,IdUt,impreciso([]),Descricao,Custo).
 
-        evolucaoCuidadoImprecisos(Dia,Mes,Ano,IdUt,IdPrest,impreciso([X|T]),Custo):-
-            evolucaoCuidadoImprecisos(Dia,Mes,Ano,IdUt,IdPrest,X,Custo),
-            evolucaoCuidadoImprecisos(Dia,Mes,Ano,IdUt,IdPrest,impreciso(T),Custo).
+        evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,IdUt,IdPrest,impreciso([X|T]),Custo):-
+            evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,IdUt,IdPrest,X,Custo),
+            evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,IdUt,IdPrest,impreciso(T),Custo).
 
-        evolucaoCuidadoImprecisos(Dia,Mes,Ano,IdUt,IdPrest,impreciso([]),Custo).
+        evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,IdUt,IdPrest,impreciso([]),Custo).
 
-        evolucaoCuidadoImprecisos(Dia,Mes,Ano,IdUt,IdPrest,Descricao,impreciso([X|T])):-
-            evolucaoCuidadoImprecisos(Dia,Mes,Ano,IdUt,IdPrest,Descricao,X),
-            evolucaoCuidadoImprecisos(Dia,Mes,Ano,IdUt,IdPrest,Descricao,impreciso(T)).
+        evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,impreciso([X|T])):-
+            evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,X),
+            evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,impreciso(T)).
 
-        evolucaoCuidadoImprecisos(Dia,Mes,Ano,IdUt,IdPrest,Descricao,impreciso([])).
+        evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,impreciso([])).
 
-        evolucaoCuidadoImprecisos(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo):- evolucaoExcecao(cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)).
+        evolucaoCuidadoImprecisos(IdCDia,Mes,Ano,IdUt,IdPrest,Descricao,Custo):- evolucaoExcecao(cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)).
 
 
 %% Conhecimento Incerto
-    evolucaoUtente(Id,Nome,Idade,Morada):-
-        seNomeIncertoRemove(Nome),
-        seIdadeIncertoRemove(Idade),
-        seMoradaIncertaRemove(Morada),
-        removeDesconhecido(Id,Nome,Idade,Morada),
-        evolucao(Utente).
-        
-    involucaoUtente(Id,Nome,Idade,Morada):- 
-        seNomeIncertoRemove(Nome),
-        seIdadeIncertoRemove(Idade),
-        seMoradaIncertaRemove(Morada),
-        involucao(Utente).
+    removeUtenteDesconhecido(IdUt):-
+        findall(excecao(utente(IdUt,N,I,M)),excecao(utente(IdUt,N,I,M)),S),
+        removeTodos(S).
+    evolucaoUtenteDesconhecido(Id,Nome,Idade,Morada):-
+            removeUtenteDesconhecido(Id),
+            evolucao(utente(Id,Nome,Idade,Morada)).
+    removeSeNomeIncerto(Id) :- 
+        findall(
+            utente(IdUt,incerto,A,N),
+            utente(IdUt,incerto,A,N),
+            S
+        ),
+        removeHead(S).
+    removeSeIdadeIncerto(Id) :- 
+        findall(
+            utente(IdUt,N,incerto,M),
+            utente(IdUt,N,incerto,M),
+            S
+        ),
+        removeHead(S).
+    removeSeMoradaIncerto(Id) :- 
+        findall(
+            utente(IdUt,N,A,incerto),
+            utente(IdUt,N,A,incerto),
+            S
+        ),
+        removeHead(S).
 
+    %% prestador(IdPrest,Nome,Especialidade,Instituicao)
+    removePrestadorDesconhecido(IdPrest):-
+        findall(excecao(prestador(IdPrest,N,E,I)),excecao(prestador(IdPrest,N,E,I)),S),
+        removeTodos(S).
+    evolucaoPrestadorDesconhecido(IdPrest,Nome,Especialidade,Instituicao):-
+            removePrestadorDesconhecido(Id),
+            evolucao(prestador(IdPrest,Nome,Especialidade,Instituicao)).
+    % cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)
+    removeCuidadoDesconhecido(IdC):-
+        findall(excecao(cuidado(IdC,D,M,A,Ut,Prest,Desc,C)),excecao(cuidado(IdC,D,M,A,Ut,Prest,Desc,C)),S),
+        removeTodos(S).
+    evolucaoCuidadoDesconhecido(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo):-
+            removeUtenteDesconhecido(IdC),
+            evolucao(utente(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)).
 
 %%--------------------------------------------------------------------------------------------------------------
 %% Desenvolver um sistema de inferência capaz de implementar os mecanismos de raciocínio inerentes a estes sistemas
