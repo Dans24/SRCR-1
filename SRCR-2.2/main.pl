@@ -279,6 +279,9 @@ interdito(interdito).
     %% O valor do id tem de ser inteiro e nao pode ser nao nulo
     +utente(IdUt,Nome,Idade,Morada) :: (nao(nulo(IdUt)),integer(IdUt)).
 
+    %% O valor do idade tem de ser positivo ou nulo
+    +utente(IdUt,Nome,Idade,Morada) :: positivo(Idade).
+
     %% Conhecimento positivo não pode ser negativo. 
     +utente(IdUt,Nome,Idade,Morada)::nao(-utente(IdUt,Nome,Idade,Morada)).
     +(-utente(IdUt,Nome,Idade,Morada))::nao(utente(IdUt,Nome,Idade,Morada)).
