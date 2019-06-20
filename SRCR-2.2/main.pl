@@ -173,8 +173,8 @@ interdito(interdito).
     prestador(3,interdito,cirurgiageral,hospitalbeira).
     +prestador(IdPrest,Nome,Especialidade,Instituicao) :: (
                         findall(
-                            (IdPres,NS,Especialidade,Instituicao),
-                            (utente(3,NS,Especialidade,Instituicao), nao(interdito(NS))),
+                            (IdPrest,NS,Especialidade,Instituicao),
+                            (prestador(3,NS,Especialidade,Instituicao), nao(interdito(NS))),
                             S ),
                         comprimento( S,N ), N == 0 
                     ).
