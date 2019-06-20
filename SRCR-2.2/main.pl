@@ -24,10 +24,11 @@ interdito(interdito).
 
 %Caso de Estudo
 
+%%--------------------------------------------------------------------------------------------------------------
 %% Representar Conhecimento Positivo e Negativo
+%%--------------------------------------------------------------------------------------------------------------
 
-%%-----------------------------------------------------------------------
-%Utente
+%Utente -----------------------------------------------------------------------
 %%  utente(IdUt,Nome,Idade,Morada)
 :- dynamic utente/4.
 
@@ -45,8 +46,7 @@ utente(1,jorge,25,braga).
         %% Logo a Maria não pode ter 40 ou menos anos
 -utente(2,maria,IDADE,porto):- IDADE =< 40.
 
-%%-----------------------------------------------------------------------
-%Prestador
+%Prestador -----------------------------------------------------------------------
 %% prestador(idPrest,Nome,Especialidade,Instituicao)
 :- dynamic prestador/4.
 
@@ -63,23 +63,28 @@ prestador(1,juan,ortopedia,hospitalbraga).
     %% Sabe-se que o carlos não trabalha no hospital do porto
 -prestador(2,carlos,_,hospitalporto).
 
-%%-----------------------------------------------------------------------
-%Cuidado
+%Cuidado -----------------------------------------------------------------------
 %% cuidado(Data,IdUt,IdPrest,Descricao,Custo)
 :- dynamic cuidado/7.
 
-
-
-
-%% Descrição não pode ser nula. Pode ser vazia.
+%% Conhecimento Negativo
 -cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo):-
         nao(cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)),
         nao(excecao(cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))).
 
+%% Exemplos de Conhecimento Positivo
+    %% No dia 18/6/2019, foi prestado um cuidado ao utente Jorge(1), pelo prestador Juan(1), 
+    %% com a descrição "consulta ortopedia" e teve o custo de 20€ (2000 cêntimos)
+cuidado(18,6,2019,1,1,consultaOrtopedia,2000).
 
-%%--------------------------------------------------------------------------------------------------------
+%% Exemplos de Conhecimento Negativo
+    %% O prestador Carlos(2) nunca participou num cuidado com o utente Jorge(1) no ano 2018.
+-prestador(_,_,2018,1,2,_,_).
 
+
+%%--------------------------------------------------------------------------------------------------------------
 %% Representar casos de conhecimento Imperfeito, pela utilização de valores nulos de todos os tipos estudados;
+%%--------------------------------------------------------------------------------------------------------------
 
 %% Exemplo de conhecimento Incerto
     %% O utente 2 chama-se Maria e mora em guimaraes. A sua idade é incerta, uma vez que não se pergunta a idade a uma senhora
@@ -245,9 +250,9 @@ excecao(cuidado(_,1,2009,_,2, "utente mostra sinais de abuso", Custo)) :- Custo 
                   ).
 
 
-%%--------------------------------------------------------------------------------------------------------
-
+%%--------------------------------------------------------------------------------------------------------------
 %% Manipular invariantes que designem restrições à inserção e à remoção de conhecimento do sistema;
+%%--------------------------------------------------------------------------------------------------------------
 
 %% Invariantes
 %%% Inserção de Conhecimento
@@ -320,9 +325,9 @@ ilhas(acores).
 positivo(N):- integer(N), N>0.
 positivo(Nulo).
 
-%%--------------------------------------------------------------------------------------------------------
-
+%%--------------------------------------------------------------------------------------------------------------
 %% Lidar com a problemática da evolução do conhecimento, criando os procedimentos adequados;
+%%--------------------------------------------------------------------------------------------------------------
 
 %% Sistema de evolução de conhecimento
 teste([]).
@@ -380,9 +385,9 @@ addPrestadoresImprecisos(Id,N,E,impreciso([X|T])):- addPrestadoresImprecisos(Id,
 addPrestadoresImprecisos(Id,N,E,impreciso([])).
 addPrestadoresImprecisos(Id,N,E,I):- evolucaoExcecao(prestador(Id,N,E,I)).
 
-%%--------------------------------------------------------------------------------------------------------
-
+%%--------------------------------------------------------------------------------------------------------------
 %% Desenvolver um sistema de inferência capaz de implementar os mecanismos de raciocínio inerentes a estes sistemas
+%%--------------------------------------------------------------------------------------------------------------
 
 nao(T):- T,!,fail.
 nao(T).
