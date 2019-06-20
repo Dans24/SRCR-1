@@ -26,9 +26,10 @@ interdito(interdito).
 
 %% Representar Conhecimento Positivo e Negativo
 
+%%-----------------------------------------------------------------------
 %Utente
-:- dynamic utente/4.
 %%  utente(IdUt,Nome,Idade,Morada)
+:- dynamic utente/4.
 
 %% Conhecimento Negativo
 -utente(IdUt,Nome,Idade,Morada):-
@@ -44,9 +45,9 @@ utente(1,jorge,25,braga).
         %% Logo a Maria não pode ter 40 ou menos anos
 -utente(2,maria,IDADE,porto):- IDADE =< 40.
 
+%%-----------------------------------------------------------------------
 %Prestador
-    %% prestador(idPrest,Nome,Especialidade,Instituicao)
-
+%% prestador(idPrest,Nome,Especialidade,Instituicao)
 :- dynamic prestador/4.
 
 %% Conhecimento Negativo
@@ -62,10 +63,13 @@ prestador(1,juan,ortopedia,hospitalbraga).
     %% Sabe-se que o carlos não trabalha no hospital do porto
 -prestador(2,carlos,_,hospitalporto).
 
-
+%%-----------------------------------------------------------------------
 %Cuidado
-    %% cuidado(Data,IdUt,IdPrest,Descricao,Custo)
+%% cuidado(Data,IdUt,IdPrest,Descricao,Custo)
 :- dynamic cuidado/7.
+
+
+
 
 %% Descrição não pode ser nula. Pode ser vazia.
 -cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo):-
@@ -209,6 +213,8 @@ excecao(cuidado(5,8,2018,2,3,descricao,300)).
 excecao(cuidado(5,8,2018,2,1,descricao,300)).
 
 %% TODO mais alguns exemplos
+
+
 
 %% Exemplo de imprecisão na data da consulta.
     %% No dia em que a consulta foi registada o sistema estava com graves falhas, levando a que haja uma grande incerteza
