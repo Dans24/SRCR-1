@@ -322,8 +322,8 @@ ilhas(acores).
 +(-cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(nulo(Custo)).
 
 %% O custo de um cuidado tem de ser positivo
-positivo(N):- integer(N), N>0.
-positivo(Nulo).
+positivo(N) :- integer(N), N>0.
+positivo(Nulo) :- nulo(Nulo).
 
 %%--------------------------------------------------------------------------------------------------------------
 %% Lidar com a problemática da evolução do conhecimento, criando os procedimentos adequados;
