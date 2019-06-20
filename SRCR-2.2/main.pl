@@ -414,43 +414,27 @@ interdito(interdito).
     involucaoAll([X|T]):- involucao(X), involucaoAll(T).
     involucaoAll([]).
 
+    contem(X,[]).
+    contem(X,[X|T]).
+    contem(X,[H|T]) :- contem(X,T).
+
 %% Conhecimento Impreciso
 
     % Utente -----------------------------------------------------------------------
 
         %% Exemplo de predicado que adiciona várias exceções de utentes
         evolucaoUtentesImprecisos(Id,impreciso([X|T]),I,M):- evolucaoUtentesImprecisos(Id,X,I,M),evolucaoUtentesImprecisos(Id,impreciso(T),I,M).
-
         evolucaoUtentesImprecisos(Id,impreciso([]),I,M).
-
-        evolucaoUtentesImprecisos(Id,N,impreciso([X|T]),M):- evolucaoUtentesImprecisos(Id,N,X,M),evolucaoUtentesImprecisos(Id,N,impreciso(T),M).
-
-        evolucaoUtentesImprecisos(Id,N,impreciso([]),M).
-
-        evolucaoUtentesImprecisos(Id,N,I,impreciso([X|T])):- evolucaoUtentesImprecisos(Id,N,I,X),evolucaoUtentesImprecisos(Id,N,I,impreciso(T)).
-
-        evolucaoUtentesImprecisos(Id,N,I,impreciso([])).
-        
         evolucaoUtentesImprecisos(Id,N,I,M):- evolucaoExcecao((Id,N,I,M)).
 
-        remocaoUtentesImprecisos(Id):- findall(excecao(utentes(Id,N,I,M)),excecao(utentes(Id,N,I,M)),S), involucaoAll(S).
+        %remocaoUtentesImprecisos(Id):- findall(excecao(utentes(Id,N,I,M)),excecao(utentes(Id,N,I,M)),S), involucaoAll(S).
 
 
     % Prestador -----------------------------------------------------------------------
 
         %% Exemplo de predicado que adiciona várias exceções de prestadores
         evolucaoPrestadoresImprecisos(Id,impreciso([X|T]),E,I):- evolucaoPrestadoresImprecisos(Id,X,E,I),evolucaoPrestadoresImprecisos(Id,impreciso(T),E,I).
-
         evolucaoPrestadoresImprecisos(Id,impreciso([]),E,I).
-
-        evolucaoPrestadoresImprecisos(Id,N,impreciso([X|T]),I):- evolucaoPrestadoresImprecisos(Id,N,X,I),evolucaoPrestadoresImprecisos(Id,N,impreciso(T),I).
-
-        evolucaoPrestadoresImprecisos(Id,N,impreciso([]),M).
-
-        evolucaoPrestadoresImprecisos(Id,N,E,impreciso([X|T])):- evolucaoPrestadoresImprecisos(Id,N,E,X),evolucaoPrestadoresImprecisos(Id,N,E,impreciso(T)).
-
-        evolucaoPrestadoresImprecisos(Id,N,E,impreciso([])).
-
         evolucaoPrestadoresImprecisos(Id,N,E,I):- evolucaoExcecao(prestador(Id,N,E,I)).
 
 
@@ -459,37 +443,28 @@ interdito(interdito).
         evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,impreciso([X|T]),IdPrest,Descricao,Custo):- 
             evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,X,IdPrest,Descricao,Custo),
             evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,impreciso(T),IdPrest,Descricao,Custo).
-
         evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,impreciso([]),IdPrest,Descricao,Custo).
-
-        evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,IdUt,impreciso([X|T]),Descricao,Custo):-
-            evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,IdUt,X,Descricao,Custo),
-            evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,IdUt,impreciso(T),Descricao,Custo).
-
-        evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,IdUt,impreciso([]),Descricao,Custo).
-
-        evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,IdUt,IdPrest,impreciso([X|T]),Custo):-
-            evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,IdUt,IdPrest,X,Custo),
-            evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,IdUt,IdPrest,impreciso(T),Custo).
-
-        evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,IdUt,IdPrest,impreciso([]),Custo).
-
-        evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,impreciso([X|T])):-
-            evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,X),
-            evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,impreciso(T)).
-
-        evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,impreciso([])).
-
         evolucaoCuidadoImprecisos(IdCDia,Mes,Ano,IdUt,IdPrest,Descricao,Custo):- evolucaoExcecao(cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)).
 
+    %TODO meter evolucao de conhecimento incerto/impreciso intervalos e interdito? 
 
 %% Conhecimento Incerto
-    removeUtenteDesconhecido(IdUt):-
-        findall(excecao(utente(IdUt,N,I,M)),excecao(utente(IdUt,N,I,M)),S),
-        removeTodos(S).
-    evolucaoUtenteDesconhecido(Id,Nome,Idade,Morada):-
-            removeUtenteDesconhecido(Id),
+
+    evolucaoUtenteIncertoIdade(Id,Idade):-
+
+            remocao(utente(Id,Nome,incerto,Morada)),
             evolucao(utente(Id,Nome,Idade,Morada)).
+
+    evolucaoUtenteImprecisoIdade(Id,Nome,Idade,Morada):-
+            findall(Idade2,excecao(utente(Id,Nome,Idade2,Morada)),Lista),
+            contem(Idade,Lista),
+            findall(excecao(utente(Id,_,_,_)),excecao(utente(Id,_,_,_)),S),
+            removeTodos(S),
+            evolucao(utente(Id,Nome,Idade,Morada)).
+    
+    excecao(utente(34,marco,24,lisboa)).
+    excecao(utente(34,marco,25,lisboa)).
+    
     removeSeNomeIncerto(Id) :- 
         findall(
             utente(IdUt,incerto,A,N),
