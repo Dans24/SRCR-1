@@ -42,7 +42,7 @@ utente(1,jorge,25,braga).
 %% Exemplos de Conhecimento Negativo
     %% Sabe-se que a utente numero 2, Maria tem mais do que 40 anos
         %% Logo a Maria não pode ter 40 ou menos anos
--utente(2,maria,IDADE,Morada):- IDADE =< 40.
+-utente(2,maria,IDADE,porto):- IDADE =< 40.
 
 %Prestador
     %% prestador(idPrest,Nome,Especialidade,Instituicao)
@@ -312,8 +312,7 @@ ilhas(acores).
 
 %% O custo de um cuidado tem de ser positivo
 positivo(N):- integer(N), N>0.
-positivo(N):- integer(N), N>0.
-positivo(Nulo):- integer(N), N>0.
+positivo(Nulo).
 
 %%--------------------------------------------------------------------------------------------------------
 
@@ -357,7 +356,7 @@ involucao(T):-
             teste(Lista).
 
 
-%% Exemplo de predicado que adiciona várias exceções
+%% Exemplo de predicado que adiciona várias exceções de utentes
 addUtentesImprecisos(Id,impreciso([X|T]),I,M):- addUtentesImprecisos(Id,X,I,M),addUtentesImprecisos(Id,impreciso(T),I,M).
 addUtentesImprecisos(Id,impreciso([]),I,M).
 addUtentesImprecisos(Id,N,impreciso([X|T]),M):- addUtentesImprecisos(Id,N,X,M),addUtentesImprecisos(Id,N,impreciso(T),M).
@@ -365,6 +364,15 @@ addUtentesImprecisos(Id,N,impreciso([]),M).
 addUtentesImprecisos(Id,N,I,impreciso([X|T])):- addUtentesImprecisos(Id,N,I,X),addUtentesImprecisos(Id,N,I,impreciso(T)).
 addUtentesImprecisos(Id,N,I,impreciso([])).
 addUtentesImprecisos(Id,N,I,M):- evolucaoExcecao(utente(Id,N,I,M)).
+
+%% Exemplo de predicado que adiciona várias exceções de prestadores
+addPrestadoresImprecisos(Id,impreciso([X|T]),E,I):- addPrestadoresImprecisos(Id,X,E,I),addPrestadoresImprecisos(Id,impreciso(T),E,I).
+addPrestadoresImprecisos(Id,impreciso([]),E,I).
+addPrestadoresImprecisos(Id,N,impreciso([X|T]),I):- addPrestadoresImprecisos(Id,N,X,I),addPrestadoresImprecisos(Id,N,impreciso(T),I).
+addPrestadoresImprecisos(Id,N,impreciso([]),M).
+addPrestadoresImprecisos(Id,N,E,impreciso([X|T])):- addPrestadoresImprecisos(Id,N,E,X),addPrestadoresImprecisos(Id,N,E,impreciso(T)).
+addPrestadoresImprecisos(Id,N,E,impreciso([])).
+addPrestadoresImprecisos(Id,N,E,I):- evolucaoExcecao(prestador(Id,N,E,I)).
 
 %%--------------------------------------------------------------------------------------------------------
 
