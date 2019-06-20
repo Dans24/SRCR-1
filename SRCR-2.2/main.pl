@@ -65,12 +65,12 @@ prestador(1,juan,ortopedia,hospitalbraga).
 
 %Cuidado
     %% cuidado(Data,IdUt,IdPrest,Descricao,Custo)
-:- dynamic cuidado/5.
+:- dynamic cuidado/7.
 
 %% Descrição não pode ser nula. Pode ser vazia.
--cuidado(Data,IdUt,IdPrest,Descricao,Custo):-
-        nao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)),
-        nao(excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo))).
+-cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo):-
+        nao(cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)),
+        nao(excecao(cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))).
 
 
 %%--------------------------------------------------------------------------------------------------------
@@ -103,6 +103,14 @@ excecao(utente(IdUt,Nome,Idade,Morada)):- utente(IdUt,interdito,Idade,Morada).
 excecao(utente(4,marco,braga,21)).
 excecao(utente(4,mario,braga,21)).
 
+%% Exemplo de conhecimento Impreciso em mais do que um atributo de utente
+    %% O utente tinha um sotaque muito carregado e quando disse as suas informações ao funcionário ele ficou indeciso em relação ao nome
+    %% e morada, por lapso o funcionário não registou a sua idade, mas pela aparência da pessoa deduziu que teria mais de 50 anos.
+excecao(utente(7,paco,Idade,la_paz)) :- Idade > 50. 
+excecao(utente(7,paulo,Idade,la_paz)) :- Idade > 50.
+excecao(utente(7,paco,Idade,lapas)) :- Idade > 50.
+excecao(utente(7,paulo,Idade,lapas)) :- Idade > 50.
+
 %% Mistura de conhecimento Impreciso+Incerto
     %% O utente numero 5 Joaquim tem a idade incerta e, devido a mudanças de habitação não se sabe se este mora em braga ou em guimaraes
     %% No caso de mistura de conhecimento incerto ou interdito este é representado na exceção com _ (uma variável não unificada).
@@ -120,6 +128,8 @@ excecao(utente(6,gustavo,Idade,_)):- Idade<40, Idade>=30.
                         S ),
                     comprimento( S,N ), N == 0 
                   ).
+
+/** Acho que até faz bastante sentido
 +(-utente(IdUt,Nome,Idade,Morada)) :: (
                     findall(
                         (IdUt,Nome,Idade,MS),
@@ -127,60 +137,107 @@ excecao(utente(6,gustavo,Idade,_)):- Idade<40, Idade>=30.
                         S ),
                     comprimento( S,N ), N == 0 
                   ).
-
+*/
 
 %% Exemplo de conhecimento Incerto
-    %% O prestador 2 carlos presta consultas de nutrição, não se sabe no entanto em que local
+    %% O prestador 2 carlos presta consultas de nutrição, não se sabe no entanto em que instituicao
 prestador(2,carlos,nutricao,incerto).
-excecao(prestador(IdUt,Nome,Especialidade,Local)):- prestador(IdUt,Nome,Especialidade,incerto).
+excecao(prestador(IdPrest,Nome,Especialidade,Instituicao)):- prestador(IdPrest,Nome,Especialidade,incerto).
 
 %% Exemplo de conhecimento Interdito
     %% Por motivos judiciais é impossivel aceder ao nome do prestador 3
         %% Este prestador especializa-se em cirurgia geral no hospital da beira
 prestador(3,interdito,cirurgiageral,hospitalbeira).
-+prestador(IdUt,Nome,Especialidade,Local) :: (
++prestador(IdPrest,Nome,Especialidade,Instituicao) :: (
                     findall(
-                        (IdUt,NS,Especialidade,Local),
-                        (utente(3,NS,cirurgiageral,hospitalbeira), nao(interdito(NS))),
+                        (IdPres,NS,Especialidade,Instituicao),
+                        (utente(3,NS,Especialidade,Instituicao), nao(interdito(NS))),
                         S ),
                     comprimento( S,N ), N == 0 
                   ).
+excecao(prestador(IdPrest,Nome,Especialidade,Instituicao)):- prestador(IdPrest,interdito,Especialidade,Instituicao).
 
 %% Exemplo de conhecimento Impreciso
     %% Houve uma corrupção no sistema de dados.
     %% Por causa disto é impossivel determinar se o prestador antonio se especializa em Oncologia ou Oftalmologia.
-    %% Sabe-se que o servico é prestado em lisboa. 
+    %% Sabe-se que o prestador é do hospital de lisboa. 
 excecao(prestador(4,antonio,oncologia,hospitallisboa)).
 excecao(prestador(4,antonio,oftalmologia,hospitallisboa)).
 
 %% TODO Mistura de Conhecimento
+%% Exemplo de conhecimento Incerto+Impreciso
+    %% Foi requisitado um médico de urgência para prestar assistência numa intervenção cirurgica a um coração, ficou indefinida qual
+    %% a sua instituição de trabalho e, por outro lado, não há certeza se o prestador era um cardiologista ou um cirurgiao_cardiovascular.
+    %% Sabe-se que o prestador chama-se jorge.
+excecao(prestador(5,jorge,cardiologista,_)).
+excecao(utente(5,jorge,cirurgiao_cardiovascular,_)).
 
-
-%cuidado(Data,IdUt,IdPrest,Descricao,Custo)
-%% Exemplo de conhecimento Incerto
-    %% O valor pago na consulta 3 administrada pelo prestador 2 ao utente 1 no dia 3
-cuidado(3,1,2,"utente perdeu 2 kilos desde a ultima consulta",incerto).
-excecao(cuidado(Data,IdUt,IdPrest,Descricao,Custo)):- cuidado(Data,IdUt,IdPrest,Descricao,incerto).
-
-%% Exemplo de conhecimento Interdito
-    %% A descrição do cuidado ... é interdita
-cuidado(25,2,3,interdito,250)
-+cuidado(Data,IdUt,IdPrest,Descricao,Custo) :: (
+%%Exemplo de conhecimento Incerto+Interdito
+    %% Houve uma falha no sistema
+    %% Não é possível determinar o nome do prestador, sendo que são interditas a sua especialidade e instituição 
+excecao(prestador(6,_,_,_)).
++prestador(IdPrest,Nome,Especialidade,Instituicao) :: (
                     findall(
-                        (Data,IdUt,IdPrest,DS,Custo),
-                        (cuidado(25,2,3,DS,250), nao(interdito(DS))),
+                        (IdPrest,NS,Especialidade,Instituicao),
+                        (prestador(6,NS,Especialidade,Instituicao), nao(interdito(Especialidade)), nao(interdito(Instituicao))),
                         S ),
                     comprimento( S,N ), N == 0 
                   ).
 
+%cuidado(Data,IdUt,IdPrest,Descricao,Custo)
+%% Exemplo de conhecimento Incerto
+    %% O valor pago na consulta administrada pelo prestador 2 ao utente 1 no dia 3 de junho de 2019
+cuidado(3,6,2019,1,2,"utente perdeu 2 kilos desde a ultima consulta",incerto).
+excecao(cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)):- cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,incerto).
+
+%% Exemplo de conhecimento Interdito
+    %% A descrição do cuidado ... é interdita
+cuidado(25,4,2018,2,3,interdito,250).
++cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo) :: (
+                    findall(
+                        (Dia,Mes,Ano,IdUt,IdPrest,DS,Custo),
+                        (cuidado(25,4,2018,2,3,DS,250), nao(interdito(DS))),
+                        S ),
+                    comprimento( S,N ), N == 0 
+                  ).
+excecao(cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)):- cuidado(Dia,Mes,Ano,IdUt,IdPrest,interdito,Custo).
+
 %% Exemplo de conhecimento Impreciso
     %% A pessoa responsável pelo registo dos cuidados não percebeu qual o cuidado que ia ser administrado ao utente
-    %% Por causa disto não se sabe se o cuidado administrado no dia 5 foi do prestador 1 ou 3
-excecao(cuidado(5,2,3,descricao,300)).
-excecao(cuidado(5,2,1,descricao,300)).
+    %% Por causa disto não se sabe se o cuidado administrado no dia 5 de agosto de 2017 foi do prestador 1 ou 3
+excecao(cuidado(5,8,2018,2,3,descricao,300)).
+excecao(cuidado(5,8,2018,2,1,descricao,300)).
 
 %% TODO mais alguns exemplos
+
+%% Exemplo de imprecisão na data da consulta.
+    %% No dia em que a consulta foi registada o sistema estava com graves falhas, levando a que haja uma grande incerteza
+    %% em relação à data da consulta e o seu custo.
+    %% Sabe-se que deve ter ocorrido em abril ou junho, sendo que só pode ter ocorrido entre o dia 10 e o 30,
+    %% porém é sabido que se ocorreu em abril não pode ter sido no dia 25 e se foi em junho não pode ter sido no dia 10, pois são feriados. 
+    %% O ano foi 2019.
+    %% O custo foi inferior a 500 euros, mas não pode ter sido de graça.
+excecao(cuidado(Dia,Mes,2017,2,3,"",Custo)) :- Mes =:= 4, Dia >= 10, Dia =< 30, Dia \= 25, Custo < 500, Custo \= 0.
+excecao(cuidado(Dia,Mes,2017,2,3,"",Custo)) :- Mes =:= 6, Dia > 10, Dia =< 30, Custo < 500, Custo \= 0.
+
 %% TODO Mistura de conhecimento
+
+%% !! Não me lembro se podemos ter tipos de conhecimentos diferentes na PK
+%% Exemplo de Mistura de conhecimento Incerto+Interdito+Impreciso
+    %% Foi realizada um intervenção de urgência a uma figura muito relevante na sociedade portuguesa e a pedido
+    %% dessa mesma ela não pode estar associada a este registo de consulta.
+    %% Sabe-se que o custo ou foi de 500 euros ou então está entre os 1000 e os 2000 euros.
+    %% A consulta foi realizada no mes de janeiro em 2009. O dia da consulta é incerto.
+excecao(cuidado(_,1,2009,_,2, "utente mostra sinais de abuso", Custo)) :- Custo =:= 500. 
+excecao(cuidado(_,1,2009,_,2, "utente mostra sinais de abuso", Custo)) :- Custo >= 1000, Custo =< 2000.
++cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo) :: (
+                    findall(
+                        (Dia,Mes,Ano,IdUt,IdPrest,DS,Custo),
+                        (cuidado(Dia,1,2009,IdUt,2,"utente mostra sinais de abuso",Custo), nao(interdito(IdUt))),
+                        S ),
+                    comprimento( S,N ), N == 0 
+                  ).
+
 
 %%--------------------------------------------------------------------------------------------------------
 
@@ -242,14 +299,16 @@ ilhas(acores).
 +(-prestador(IdPrest,Nome,Especialidade,Instituicao))::nao(nulo(Instituicao)).
 
 %% Conhecimento positivo não pode ser negativo. 
-+cuidado(Data,IdUt,IdPrest,Descricao,Custo)::nao(-cuidado(Data,IdUt,IdPrest,Descricao,Custo)).
++cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(-cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)).
 
 %% Não se pode adicionar conhecimento negativo com nulos. 
-+(-cuidado(Data,IdUt,IdPrest,Descricao,Custo))::nao(nulo(Data)).
-+(-cuidado(Data,IdUt,IdPrest,Descricao,Custo))::nao(nulo(IdUt)).
-+(-cuidado(Data,IdUt,IdPrest,Descricao,Custo))::nao(nulo(IdPrest)).
-+(-cuidado(Data,IdUt,IdPrest,Descricao,Custo))::nao(nulo(Descricao)).
-+(-cuidado(Data,IdUt,IdPrest,Descricao,Custo))::nao(nulo(Custo)).
++(-cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(nulo(Dia)).
++(-cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(nulo(Mes)).
++(-cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(nulo(Ano)).
++(-cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(nulo(IdUt)).
++(-cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(nulo(IdPrest)).
++(-cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(nulo(Descricao)).
++(-cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(nulo(Custo)).
 
 %% O custo de um cuidado tem de ser positivo
 positivo(N):- integer(N), N>0.
