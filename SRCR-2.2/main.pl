@@ -72,21 +72,21 @@ interdito(interdito).
 % Cuidado -----------------------------------------------------------------------
 
     %% cuidado(Data,IdUt,IdPrest,Descricao,Custo)
-    :- dynamic cuidado/7.
+    :- dynamic cuidado/8.
 
     %% Conhecimento Negativo
-    -cuidado(Id,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo):-
-            nao(cuidado(Id,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)),
-            nao(excecao(cuidado(Id,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))).
+    -cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo):-
+            nao(cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)),
+            nao(excecao(cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))).
 
     %% Exemplos de Conhecimento Positivo
         %% No dia 18/6/2019, foi prestado um cuidado ao utente Jorge(1), pelo prestador Juan(1), 
         %% com a descrição "consulta ortopedia" e teve o custo de 20€ (2000 cêntimos)
-    cuidado(18,6,2019,1,1,consultaOrtopedia,2000).
+    cuidado(1,20,18,6,2019,1,1,consultaOrtopedia,2000).
 
     %% Exemplos de Conhecimento Negativo
         %% O prestador Carlos(2) nunca participou num cuidado com o utente Jorge(1) no ano 2018.
-    -cuidado(_,_,2018,1,2,_,_).
+    -cuidado(_,_,_,2018,1,2,_,_).
 
 
 
@@ -208,7 +208,8 @@ interdito(interdito).
 % Cuidado -----------------------------------------------------------------------
 
 %% Exemplo de conhecimento Incerto
-    %% O valor pago na consulta administrada pelo prestador 2 ao utente 1 no dia 3 de junho de 2019
+    %% O valor pago na consulta administrada pelo prestador 2 ao utente 1 no dia 3 de junho de 2019 é incerto, porque 
+    % o prestador esqueceu-se de registar o preço do cuidado.
     cuidado(1,3,6,2019,1,2,"utente perdeu 2 kilos desde a ultima consulta",incerto).
     excecao(cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)):- cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,incerto).
 
@@ -230,6 +231,9 @@ interdito(interdito).
     excecao(cuidado(3,5,8,2018,2,3,descricao,300)).
     excecao(cuidado(3,5,8,2018,2,1,descricao,300)).
 
+%% TODO mais alguns exemplos
+
+
 
 %% Exemplo de imprecisão na data da consulta.
     %% No dia em que a consulta foi registada o sistema estava com graves falhas, levando a que haja uma grande incerteza
@@ -241,6 +245,9 @@ interdito(interdito).
     excecao(cuidado(4,Dia,Mes,2017,2,3,"",Custo)) :- Mes =:= 4, Dia >= 10, Dia =< 30, Dia \= 25, Custo < 500, Custo \= 0.
     excecao(cuidado(4,Dia,Mes,2017,2,3,"",Custo)) :- Mes =:= 6, Dia > 10, Dia =< 30, Custo < 500, Custo \= 0.
 
+%% TODO Mistura de conhecimento
+
+%% !! Não me lembro se podemos ter tipos de conhecimentos diferentes na PK
 %% Exemplo de Mistura de conhecimento Incerto+Interdito+Impreciso
     %% Foi realizada uma intervenção de urgência a uma figura muito relevante na sociedade portuguesa e a pedido
     %% dessa mesma ela não pode estar associada a este registo de consulta.
@@ -322,7 +329,6 @@ positivo(N):- integer(N), N>0.
         %% Conhecimento positivo não pode ser negativo e viceversa
         +prestador(IdPrest,Nome,Especialidade,Instituicao)::nao(-prestador(IdPrest,Nome,Especialidade,Instituicao)).
         +(-prestador(IdPrest,Nome,Especialidade,Instituicao))::nao(prestador(IdPrest,Nome,Especialidade,Instituicao)).
-        
         %% Não se pode adicionar conhecimento negativo com nulos. 
         +(-prestador(IdPrest,Nome,Especialidade,Instituicao))::(nao(nulo(Nome))).
         +(-prestador(IdPrest,Nome,Especialidade,Instituicao))::(nao(nulo(Especialidade)),integer(Idade)).
@@ -399,9 +405,10 @@ positivo(N):- integer(N), N>0.
     removeHead([S|T]):- remocao(S).
 
 %% Improved Evolucao
+    +excecao(T) :: (findall(T,T,S),comprimento(S,0)).
+    
     %% Os termos dentro da exceção tem de respeitar os invariantes 
     evolucaoExcecao(T):-
-                nao(T),
                 findall(Invariante, +excecao(T)::Invariante, Lista),
                 insercao(excecao(T)),
                 teste(Lista).
@@ -428,13 +435,9 @@ positivo(N):- integer(N), N>0.
             insercao((excecao(utente(Id,Nome,Idade,Morada)):-utente(Id,incerto,Idade,Morada))),
             evolucao(utente(Id,incerto,Idade,Morada)).
 
-    involucao_utente_nome_incerto(Id,Idade,Morada):-
-        remocao((excecao(utente(Id,Nome,Idade,Morada)):-utente(Id,incerto,Idade,Morada))),
-        involucao(utente(Id,incerto,Idade,Morada)).
 %% Conhecimento Impreciso
 
     % Utente -----------------------------------------------------------------------
-
         %% Exemplo de predicado que adiciona várias exceções de utentes
         evolucaoUtentesImprecisos(Id,impreciso([X|T]),I,M):- 
             evolucaoUtentesImprecisos(Id,X,I,M),
@@ -452,7 +455,7 @@ positivo(N):- integer(N), N>0.
         evolucaoPrestadoresImprecisos(Id,N,E,I):- evolucaoExcecao(prestador(Id,N,E,I)).
 
 
-    % Cuidado -----------------------------------------------------------------------
+    % Cuidado-----------------------------------------------------------------------
 
         evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,impreciso([X|T]),IdPrest,Descricao,Custo):- 
             evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,X,IdPrest,Descricao,Custo),
@@ -474,13 +477,12 @@ positivo(N):- integer(N), N>0.
             removeTodos(S).
         evolucaoCuidadoImpreciso(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo):-
                 excecao(cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)), %%Verifica se existe alguma exceção em que ele se encaixe
-                removeUtenteImpreciso(IdC),
-                evolucao(utente(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)).
+                removeCuidadoImpreciso(IdC),
+                evolucao(cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)).
 
     %% Conhecimento Incerto
 
     evolucaoUtenteIncertoIdade(Id,Idade):-
-
             remocao(utente(Id,Nome,incerto,Morada)),
             evolucao(utente(Id,Nome,Idade,Morada)).
 
@@ -490,7 +492,6 @@ positivo(N):- integer(N), N>0.
             findall(excecao(utente(Id,A,B,C)),excecao(utente(Id,A,B,C)),S),
             removeTodos(S),
             evolucao(utente(Id,Nome,Idade,Morada)).
-    
     
     %%Confirma Imprecisos
         
@@ -502,9 +503,6 @@ positivo(N):- integer(N), N>0.
                     (+utente(I,Nome,A,M) :: (findall((I,Ns,A,M),(utente(Id,Ns,Idade,Morada), nao(interdito(Ns))),S ),comprimento( S,Num ), Num == 0))
                 ),
                 evolucao(utente(Id,interdito,Idade,Morada)).
-        %%
-        involucao_utente_nome_interdito(Id,Idade,Morada):-
-                involucao(utente(Id,interdito,Idade,Morada)).
 %%--------------------------------------------------------------------------------------------------------------
 %% Desenvolver um sistema de inferência capaz de implementar os mecanismos de raciocínio inerentes a estes sistemas
 %%--------------------------------------------------------------------------------------------------------------
