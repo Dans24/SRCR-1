@@ -423,9 +423,11 @@ interdito(interdito).
     % Utente -----------------------------------------------------------------------
 
         %% Exemplo de predicado que adiciona várias exceções de utentes
-        evolucaoUtentesImprecisos(Id,impreciso([X|T]),I,M):- evolucaoUtentesImprecisos(Id,X,I,M),evolucaoUtentesImprecisos(Id,impreciso(T),I,M).
+        evolucaoUtentesImprecisos(Id,impreciso([X|T]),I,M):- 
+            evolucaoUtentesImprecisos(Id,X,I,M),
+            evolucaoUtentesImprecisos(Id,impreciso(T),I,M).
         evolucaoUtentesImprecisos(Id,impreciso([]),I,M).
-        evolucaoUtentesImprecisos(Id,N,I,M):- evolucaoExcecao((Id,N,I,M)).
+        evolucaoUtentesImprecisos(Id,N,I,M):- evolucaoExcecao(utente(Id,N,I,M)).
 
         %remocaoUtentesImprecisos(Id):- findall(excecao(utentes(Id,N,I,M)),excecao(utentes(Id,N,I,M)),S), involucaoAll(S).
 
@@ -433,7 +435,9 @@ interdito(interdito).
     % Prestador -----------------------------------------------------------------------
 
         %% Exemplo de predicado que adiciona várias exceções de prestadores
-        evolucaoPrestadoresImprecisos(Id,impreciso([X|T]),E,I):- evolucaoPrestadoresImprecisos(Id,X,E,I),evolucaoPrestadoresImprecisos(Id,impreciso(T),E,I).
+        evolucaoPrestadoresImprecisos(Id,impreciso([X|T]),E,I):- 
+            evolucaoPrestadoresImprecisos(Id,X,E,I),
+            evolucaoPrestadoresImprecisos(Id,impreciso(T),E,I).
         evolucaoPrestadoresImprecisos(Id,impreciso([]),E,I).
         evolucaoPrestadoresImprecisos(Id,N,E,I):- evolucaoExcecao(prestador(Id,N,E,I)).
 
@@ -467,22 +471,22 @@ interdito(interdito).
     
     removeSeNomeIncerto(Id) :- 
         findall(
-            utente(IdUt,incerto,A,N),
-            utente(IdUt,incerto,A,N),
+            utente(Id,incerto,A,N),
+            utente(Id,incerto,A,N),
             S
         ),
         removeHead(S).
     removeSeIdadeIncerto(Id) :- 
         findall(
-            utente(IdUt,N,incerto,M),
-            utente(IdUt,N,incerto,M),
+            utente(Id,N,incerto,M),
+            utente(Id,N,incerto,M),
             S
         ),
         removeHead(S).
     removeSeMoradaIncerto(Id) :- 
         findall(
-            utente(IdUt,N,A,incerto),
-            utente(IdUt,N,A,incerto),
+            utente(Id,N,A,incerto),
+            utente(Id,N,A,incerto),
             S
         ),
         removeHead(S).
