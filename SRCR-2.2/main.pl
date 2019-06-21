@@ -463,46 +463,48 @@ positivo(N):- integer(N), N>0.
         evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,impreciso([]),IdPrest,Descricao,Custo).
         evolucaoCuidadoImprecisos(IdCDia,Mes,Ano,IdUt,IdPrest,Descricao,Custo):- evolucaoExcecao(cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)).
 
-    %% prestador(IdPrest,Nome,Especialidade,Instituicao)
-        removePrestadorImpreciso(IdPrest):-
-            findall(excecao(prestador(IdPrest,N,E,I)),excecao(prestador(IdPrest,N,E,I)),S),
-            removeTodos(S).
-        evolucaoPrestadorImpreciso(IdPrest,Nome,Especialidade,Instituicao):-
-                excecao(prestador(IdPrest,Nome,Especialidade,Instituicao)), %%Verifica se existe alguma exceção em que ele se encaixe
-                removePrestadorImpreciso(Id),
-                evolucao(prestador(IdPrest,Nome,Especialidade,Instituicao)).
-        % cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)
-        removeCuidadoImpreciso(IdC):-
-            findall(excecao(cuidado(IdC,D,M,A,Ut,Prest,Desc,C)),excecao(cuidado(IdC,D,M,A,Ut,Prest,Desc,C)),S),
-            removeTodos(S).
-        evolucaoCuidadoImpreciso(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo):-
-                excecao(cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)), %%Verifica se existe alguma exceção em que ele se encaixe
-                removeCuidadoImpreciso(IdC),
-                evolucao(cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)).
+    
 
+    %% Conhecimento Interdito
+    evolucao_utente_nome_interdito(Id,Idade,Morada):-
+            insercao((excecao(utente(Id,Nome,Idade,Morada)):-utente(Id,interdito,Idade,Morada))),
+            insercao(
+                (+utente(I,Nome,A,M) :: (findall((I,Ns,A,M),(utente(Id,Ns,Idade,Morada), nao(interdito(Ns))),S ),comprimento( S,Num ), Num == 0))
+            ),
+            evolucao(utente(Id,interdito,Idade,Morada)).
+
+% Confirmar Conhecimento
+    %% Confirma Imprecisos
+    removeUtenteImpreciso(Id):-
+            findall(excecao(utente(Id,Nome,Idade,Morada)),excecao(utente(Id,Nome,Idade,Morada)),S),
+            removeTodos(S).
+    confirmarUtenteImpreciso(Id,Nome,Idade,Morada):-
+            excecao(utente(Id,Nome,Idade,Morada)), %%Verifica se existe alguma exceção em que ele se encaixe
+            removeUtenteImpreciso(Id),
+            evolucao(utente(Id,Nome,Idade,Morada)).
+    %% prestador(IdPrest,Nome,Especialidade,Instituicao)
+    removePrestadorImpreciso(IdPrest):-
+        findall(excecao(prestador(IdPrest,N,E,I)),excecao(prestador(IdPrest,N,E,I)),S),
+        removeTodos(S).
+    confirmarPrestadorImpreciso(IdPrest,Nome,Especialidade,Instituicao):-
+            excecao(prestador(IdPrest,Nome,Especialidade,Instituicao)), %%Verifica se existe alguma exceção em que ele se encaixe
+            removePrestadorImpreciso(Id),
+            evolucao(prestador(IdPrest,Nome,Especialidade,Instituicao)).
+    % cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)
+    removeCuidadoImpreciso(IdC):-
+        findall(excecao(cuidado(IdC,D,M,A,Ut,Prest,Desc,C)),excecao(cuidado(IdC,D,M,A,Ut,Prest,Desc,C)),S),
+        removeTodos(S).
+    confirmarCuidadoImpreciso(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo):-
+            excecao(cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)), %%Verifica se existe alguma exceção em que ele se encaixe
+            removeCuidadoImpreciso(IdC),
+            evolucao(cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)).
+   
     %% Conhecimento Incerto
 
     evolucaoUtenteIncertoIdade(Id,Idade):-
             remocao(utente(Id,Nome,incerto,Morada)),
             evolucao(utente(Id,Nome,Idade,Morada)).
-
-    evolucaoUtenteImprecisoIdade(Id,Nome,Idade,Morada):-
-            findall(Idade2,excecao(utente(Id,Nome,Idade2,Morada)),Lista),
-            contem(Idade,Lista),
-            findall(excecao(utente(Id,A,B,C)),excecao(utente(Id,A,B,C)),S),
-            removeTodos(S),
-            evolucao(utente(Id,Nome,Idade,Morada)).
     
-    %%Confirma Imprecisos
-        
-
-    %% Conhecimento Interdito
-        evolucao_utente_nome_interdito(Id,Idade,Morada):-
-                insercao((excecao(utente(Id,Nome,Idade,Morada)):-utente(Id,interdito,Idade,Morada))),
-                insercao(
-                    (+utente(I,Nome,A,M) :: (findall((I,Ns,A,M),(utente(Id,Ns,Idade,Morada), nao(interdito(Ns))),S ),comprimento( S,Num ), Num == 0))
-                ),
-                evolucao(utente(Id,interdito,Idade,Morada)).
 %%--------------------------------------------------------------------------------------------------------------
 %% Desenvolver um sistema de inferência capaz de implementar os mecanismos de raciocínio inerentes a estes sistemas
 %%--------------------------------------------------------------------------------------------------------------
