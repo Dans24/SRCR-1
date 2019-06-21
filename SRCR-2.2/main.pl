@@ -376,6 +376,13 @@ positivo(N):- integer(N), N>0.
                 S),
             comprimento(S,Num),Num<2
             ).
+
+    % Um prestador não pode ter mais do que 8 cuidados por dia 
+    +cuidado(IdC, Dia, Mes, Ano, IdUt, IdPrest, Descricao, Custo) :: (
+                                                                findall(Dia, cuidado(_,Dia,Mes,Ano, _,IdPrest,_,_), L1),
+                                                                comprimento(L1, S), S=<3
+    ).
+    
     %% Conhecimento positivo não pode ser negativo e viceversa
     +cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(-cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)).
     +(-cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)).
@@ -555,4 +562,4 @@ positivo(N):- integer(N), N>0.
     siDisj([X|T],verdadeiro):- siDisj(T,verdadeiro), -X.
     siDisj([X|T],verdadeiro):- siDisj(T,verdadeiro), nao(X), nao(-X).
     siDisj([X|T],verdadeiro):- siDisj(T,desconhecido), X.
-    siDisj([X|T],verdadeiro):- siDisj(T,falso), X.
+siDisj([X|T],verdadeiro):- siDisj(T,falso), X.
