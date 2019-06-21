@@ -76,8 +76,8 @@ interdito(interdito).
 
     %% Conhecimento Negativo
     -cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo):-
-            nao(cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)),
-            nao(excecao(cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))).
+            nao(cuidado(Id,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)),
+            nao(excecao(cuidado(Id,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))).
 
     %% Exemplos de Conhecimento Positivo
         %% No dia 18/6/2019, foi prestado um cuidado ao utente Jorge(1), pelo prestador Juan(1), 
@@ -406,7 +406,7 @@ positivo(N):- integer(N), N>0.
 
 %% Improved Evolucao
     +excecao(T) :: (findall(T,T,S),comprimento(S,0)).
-    
+
     %% Os termos dentro da exceção tem de respeitar os invariantes 
     evolucaoExcecao(T):-
                 findall(Invariante, +excecao(T)::Invariante, Lista),
