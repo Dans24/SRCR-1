@@ -466,7 +466,11 @@ positivo(N):- integer(N), N>0.
     
     evolucao_prestador_especialidade_incerto(I,N,In):-
             insercao((excecao(prestador(I,N,E,In)):-prestador(I,N,incerto,In))),
-            remocao(prestador(I,N,incerto,In)).
+            evolucao(prestador(I,N,incerto,In)).
+
+    evolucao_cuidado_custo_incerto(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao):-
+            insercao((excecao(cuidado(I,D,M,A,U,P,De,C)):-cuidado(I,D,M,A,U,P,De,incerto))),
+            evolucao(cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao, incerto)).
 
 %% Conhecimento Impreciso
 
@@ -520,8 +524,19 @@ positivo(N):- integer(N), N>0.
                     ),
                     comprimento( S,Num ), Num == 0 )
             ),
-            evolucao(prestador(I,N,interdito,In)
-    ).
+            evolucao(prestador(I,N,interdito,In)).
+
+    evolucao_cuidado_custo_interdito(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao):-
+            insercao((excecao(cuidado(I,D,M,A,U,P,De,C)):-cuidado(I,D,M,A,U,P,De,interdito))),
+            insercao(
+                (+cuidado(I,D,M,A,U,P,De,C)::(
+                    findall(
+                        (I,D,M,A,U,P,De,C),
+                        (cuidado(I,D,M,A,U,P,De,C), nao(interdito(C))),
+                        S ),
+                    comprimento( S,Num ), Num == 0))
+            ),
+            evolucao(cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao, interdito)).
 
 % Confirmar Conhecimento
     %% Confirma Imprecisos
