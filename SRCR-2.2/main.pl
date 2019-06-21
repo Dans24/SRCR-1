@@ -87,7 +87,7 @@ interdito(interdito).
     %% Exemplos de Conhecimento Negativo
         %% De forma a apresentar uma prova face a uma acusação feita por um utente, é sabido que 
         %o prestador 2 não prestou cuidado ao utente 1, no dia 1 de janeiro de 2001 com um custo de 100 euros.
-    -cuidado(102,1,1,2001,1,2,””,100).
+    -cuidado(102,1,1,2001,1,2,"",100).
 
 
 
