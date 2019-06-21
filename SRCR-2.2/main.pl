@@ -534,7 +534,7 @@ positivo(N):- integer(N), N>0.
             remocao((excecao(utente(I,N,A,M)):-utente(I,incerto,A,M))),
             remocao(utente(Id,incerto,Idade,Morada)).
 
-    confirmarUtenteIncertoNome(Id,Morada):-
+    confirmarUtenteIncertoMorada(Id,Morada):-
             utente(Id,Nome,Idade,incerto),
             evolucao(utente(Id,Nome,Idade,Morada)),
             remocao((excecao(utente(I,N,A,M)):-utente(I,N,A,incerto))),
