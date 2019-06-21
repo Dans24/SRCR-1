@@ -75,9 +75,9 @@ interdito(interdito).
     :- dynamic cuidado/7.
 
     %% Conhecimento Negativo
-    -cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo):-
-            nao(cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)),
-            nao(excecao(cuidado(Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))).
+    -cuidado(Id,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo):-
+            nao(cuidado(Id,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)),
+            nao(excecao(cuidado(Id,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))).
 
     %% Exemplos de Conhecimento Positivo
         %% No dia 18/6/2019, foi prestado um cuidado ao utente Jorge(1), pelo prestador Juan(1), 
@@ -230,9 +230,6 @@ interdito(interdito).
     excecao(cuidado(3,5,8,2018,2,3,descricao,300)).
     excecao(cuidado(3,5,8,2018,2,1,descricao,300)).
 
-%% TODO mais alguns exemplos
-
-
 
 %% Exemplo de imprecisão na data da consulta.
     %% No dia em que a consulta foi registada o sistema estava com graves falhas, levando a que haja uma grande incerteza
@@ -244,9 +241,6 @@ interdito(interdito).
     excecao(cuidado(4,Dia,Mes,2017,2,3,"",Custo)) :- Mes =:= 4, Dia >= 10, Dia =< 30, Dia \= 25, Custo < 500, Custo \= 0.
     excecao(cuidado(4,Dia,Mes,2017,2,3,"",Custo)) :- Mes =:= 6, Dia > 10, Dia =< 30, Custo < 500, Custo \= 0.
 
-%% TODO Mistura de conhecimento
-
-%% !! Não me lembro se podemos ter tipos de conhecimentos diferentes na PK
 %% Exemplo de Mistura de conhecimento Incerto+Interdito+Impreciso
     %% Foi realizada uma intervenção de urgência a uma figura muito relevante na sociedade portuguesa e a pedido
     %% dessa mesma ela não pode estar associada a este registo de consulta.
@@ -328,6 +322,7 @@ positivo(N):- integer(N), N>0.
         %% Conhecimento positivo não pode ser negativo e viceversa
         +prestador(IdPrest,Nome,Especialidade,Instituicao)::nao(-prestador(IdPrest,Nome,Especialidade,Instituicao)).
         +(-prestador(IdPrest,Nome,Especialidade,Instituicao))::nao(prestador(IdPrest,Nome,Especialidade,Instituicao)).
+        
         %% Não se pode adicionar conhecimento negativo com nulos. 
         +(-prestador(IdPrest,Nome,Especialidade,Instituicao))::(nao(nulo(Nome))).
         +(-prestador(IdPrest,Nome,Especialidade,Instituicao))::(nao(nulo(Especialidade)),integer(Idade)).
