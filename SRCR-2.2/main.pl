@@ -560,7 +560,7 @@ positivo(N):- integer(N), N>0.
     confirmarCuidadoIncertoCusto(Id,Custo):-
             cuidado(Id,Dia,Mes,Ano,IdUt,IdPrest,Descricao,incerto),
             evolucao(cuidado(Id,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)),
-            remocao((excecao(cuidado(IdC,D,M,A,Iu,Ip,D,C)):-cuidado(IdC,D,M,A,Iu,Ip,D,incerto)),
+            remocao((excecao(cuidado(IdC,D,M,A,Iu,Ip,D,C)):-cuidado(IdC,D,M,A,Iu,Ip,D,incerto))),
             remocao(cuidado(Id,Dia,Mes,Ano,IdUt,IdPrest,Descricao,incerto)).
             
     confirmarPrestadorIncertoEspecialidade(Id,Especialidade):-
