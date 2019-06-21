@@ -284,6 +284,13 @@ positivo(N):- integer(N), N>0.
             S),
         comprimento(S,Num),Num<2
         ).
+    +(-utente(IdUt,Nome,Idade,Morada)) :: (
+        findall(
+            -utente(IdUt,Nome,Idade,Morada),
+            -utente(IdUt,Nome,Idade,Morada),
+            S),
+        comprimento(S,Num),Num<2
+        ).
     %% O valor do id tem de ser inteiro e nao pode ser nao nulo
     +utente(IdUt,Nome,Idade,Morada) :: (nao(nulo(IdUt)),integer(IdUt)).
 
@@ -323,7 +330,14 @@ positivo(N):- integer(N), N>0.
                 S),
             comprimento(S,Num),Num<2
             ).
-        %
+        +(-prestador(IdPrest,Nome,Especialidade,Instituicao)) :: (
+            findall(
+                -prestador(IdPrest,Nome,Especialidade,Instituicao),
+                -prestador(IdPrest,Nome,Especialidade,Instituicao),
+                S),
+            comprimento(S,Num),Num<2
+            ).
+        
         +prestador(IdPrest,Nome,Especialidade,Instituicao) :: (nao(nulo(IdPrest)),integer(IdPrest)).
 
         %% Conhecimento positivo não pode ser negativo e viceversa
@@ -352,6 +366,13 @@ positivo(N):- integer(N), N>0.
             findall(
                 cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo),
                 cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo),
+                S),
+            comprimento(S,Num),Num<2
+            ).
+    +(-cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)) :: (
+            findall(
+                -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo),
+                -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo),
                 S),
             comprimento(S,Num),Num<2
             ).
@@ -503,9 +524,9 @@ positivo(N):- integer(N), N>0.
 
     confirmarUtenteIncertoIdade(Id,Idade):-
             utente(Id,Nome,incerto,Morada),
+            evolucao(utente(Id,Nome,Idade,Morada)),
             remocao((excecao(utente(I,N,A,M)):-utente(I,interdito,A,M))),
-            remocao(utente(Id,Nome,incerto,Morada)),
-            evolucao(utente(Id,Nome,Idade,Morada)).
+            remocao(utente(Id,Nome,incerto,Morada)).
     
 %%--------------------------------------------------------------------------------------------------------------
 %% Desenvolver um sistema de inferência capaz de implementar os mecanismos de raciocínio inerentes a estes sistemas
