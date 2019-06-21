@@ -483,7 +483,7 @@ positivo(N):- integer(N), N>0.
     evolucaoUtenteImprecisoIdade(Id,Nome,Idade,Morada):-
             findall(Idade2,excecao(utente(Id,Nome,Idade2,Morada)),Lista),
             contem(Idade,Lista),
-            findall(excecao(utente(Id,_,_,_)),excecao(utente(Id,_,_,_)),S),
+            findall(excecao(utente(Id,A,B,C)),excecao(utente(Id,A,B,C)),S),
             removeTodos(S),
             evolucao(utente(Id,Nome,Idade,Morada)).
     
