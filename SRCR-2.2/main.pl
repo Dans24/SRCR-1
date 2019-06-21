@@ -232,9 +232,6 @@ interdito(interdito).
     excecao(cuidado(3,5,8,2018,2,3,descricao,300)).
     excecao(cuidado(3,5,8,2018,2,1,descricao,300)).
 
-%% TODO mais alguns exemplos
-
-
 
 %% Exemplo de imprecisão na data da consulta.
     %% No dia em que a consulta foi registada o sistema estava com graves falhas, levando a que haja uma grande incerteza
@@ -246,9 +243,6 @@ interdito(interdito).
     excecao(cuidado(4,Dia,Mes,2017,2,3,"",Custo)) :- Mes =:= 4, Dia >= 10, Dia =< 30, Dia \= 25, Custo < 500, Custo \= 0.
     excecao(cuidado(4,Dia,Mes,2017,2,3,"",Custo)) :- Mes =:= 6, Dia > 10, Dia =< 30, Custo < 500, Custo \= 0.
 
-%% TODO Mistura de conhecimento
-
-%% !! Não me lembro se podemos ter tipos de conhecimentos diferentes na PK
 %% Exemplo de Mistura de conhecimento Incerto+Interdito+Impreciso
     %% Foi realizada uma intervenção de urgência a uma figura muito relevante na sociedade portuguesa e a pedido
     %% dessa mesma ela não pode estar associada a este registo de consulta.
@@ -468,7 +462,11 @@ positivo(N):- integer(N), N>0.
     
     evolucao_prestador_especialidade_incerto(I,N,In):-
             insercao((excecao(prestador(I,N,E,In)):-prestador(I,N,incerto,In))),
-            remocao(prestador(I,N,incerto,In)).
+            evolucao(prestador(I,N,incerto,In)).
+
+    evolucao_cuidado_custo_incerto(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao):-
+            insercao((excecao(cuidado(I,D,M,A,U,P,De,C)):-cuidado(I,D,M,A,U,P,De,incerto))),
+            evolucao(cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao, incerto)).
 
 %% Conhecimento Impreciso
 
@@ -522,8 +520,19 @@ positivo(N):- integer(N), N>0.
                     ),
                     comprimento( S,Num ), Num == 0 )
             ),
-            evolucao(prestador(I,N,interdito,In)
-    ).
+            evolucao(prestador(I,N,interdito,In)).
+
+    evolucao_cuidado_custo_interdito(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao):-
+            insercao((excecao(cuidado(I,D,M,A,U,P,De,C)):-cuidado(I,D,M,A,U,P,De,interdito))),
+            insercao(
+                (+cuidado(I,D,M,A,U,P,De,C)::(
+                    findall(
+                        (I,D,M,A,U,P,De,C),
+                        (cuidado(I,D,M,A,U,P,De,C), nao(interdito(C))),
+                        S ),
+                    comprimento( S,Num ), Num == 0))
+            ),
+            evolucao(cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao, interdito)).
 
 
 
@@ -584,6 +593,12 @@ positivo(N):- integer(N), N>0.
             evolucao(prestador(IdPrest,Nome,Especialidade,Instituicao)),
             remocao((excecao(prestador(I,N,E,In)):-prestador(I,N,incerto,In))),
             remocao(prestador(IdPrest,Nome,incerto,Instituicao)).
+
+    confirmarCuidadoIncertoCusto(Id,Custo):-
+            cuidado(Id,Dia,Mes,Ano,IdUt,IdPrest,Descricao,incerto),
+            evolucao(cuidado(Id,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)),
+            remocao((excecao(cuidado(I,D,M,A,U,P,Des,C)):-cuidado(I,D,M,A,U,P,Des,incerto))),
+            remocao(cuidado(Id,Dia,Mes,Ano,IdUt,IdPrest,Descricao,incerto)).
     
     
 %%--------------------------------------------------------------------------------------------------------------
