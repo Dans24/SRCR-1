@@ -127,10 +127,10 @@ interdito(interdito).
     %% Exemplo de conhecimento Impreciso em mais do que um atributo de utente
     %% O utente tinha um sotaque muito carregado e quando disse as suas informações ao funcionário ele ficou indeciso em relação ao nome
     %% e morada, por lapso o funcionário não registou a sua idade, mas pela aparência da pessoa deduziu que teria mais de 50 anos.
-    excecao(utente(7,paco,Idade,la_paz)) :- Idade > 50. 
-    excecao(utente(7,paulo,Idade,la_paz)) :- Idade > 50.
-    excecao(utente(7,paco,Idade,lapas)) :- Idade > 50.
-    excecao(utente(7,paulo,Idade,lapas)) :- Idade > 50.
+    excecao(utente(7,paco,Idade,la_paz)) :- integer(Idade),Idade > 50. 
+    excecao(utente(7,paulo,Idade,la_paz)) :- integer(Idade),Idade > 50.
+    excecao(utente(7,paco,Idade,lapas)) :- integer(Idade),Idade > 50.
+    excecao(utente(7,paulo,Idade,lapas)) :- integer(Idade),Idade > 50.
 
     %% Mistura de conhecimento Impreciso+Incerto
     %% O utente numero 5 Joaquim tem a idade incerta e, devido a mudanças de habitação não se sabe se este mora em braga ou em guimaraes
@@ -141,7 +141,7 @@ interdito(interdito).
     %% Mistura de conhecimento Impreciso+Interdito
     %% Sabe-se que a idade do utente 6 Gustavo está entre o intervalo [30,40[
     %% Por motivos alheios a sua morada está interdita
-    excecao(utente(6,gustavo,Idade,_)):- Idade<40, Idade>=30.
+    excecao(utente(6,gustavo,Idade,_)):- integer(Idade),Idade<40, Idade>=30.
     +utente(IdUt,Nome,Idade,Morada) :: (
                         findall(
                             (IdUt,Nome,Idade,MS),
@@ -193,7 +193,7 @@ interdito(interdito).
     %% a sua instituição de trabalho e, por outro lado, não há certeza se o prestador era um cardiologista ou um cirurgiao_cardiovascular.
     %% Sabe-se que o prestador chama-se jorge.
     excecao(prestador(5,jorge,cardiologista,_)).
-    excecao(utente(5,jorge,cirurgiao_cardiovascular,_)).
+    excecao(prestador(5,jorge,cirurgiao_cardiovascular,_)).
 
 %%Exemplo de conhecimento Incerto+Interdito
     %% Houve uma falha no sistema
@@ -278,26 +278,31 @@ interdito(interdito).
 %% Manipular invariantes que designem restrições à inserção e à remoção de conhecimento do sistema;
 %%--------------------------------------------------------------------------------------------------------------
 
+positivo(N):- integer(N), N>0.
+    positivo(incerto).
+    positivo(interdito).
+
 % Utente -----------------------------------------------------------------------
 
 %% Inserção de Conhecimento
-
+    %%Nao permite conhecimento repetido
+    +utente(IdUt,Nome,Idade,Morada) :: (
+        findall(
+            utente(IdUt,Nome,Idade,Morada),
+            utente(IdUt,Nome,Idade,Morada),
+            S),
+        comprimento(S,Num),Num<2
+        ).
     %% O valor do id tem de ser inteiro e nao pode ser nao nulo
     +utente(IdUt,Nome,Idade,Morada) :: (nao(nulo(IdUt)),integer(IdUt)).
 
     %% O valor do idade tem de ser positivo ou nulo
     +utente(IdUt,Nome,Idade,Morada) :: positivo(Idade).
 
-    %% Conhecimento positivo não pode ser negativo. 
+    %% Conhecimento positivo não pode ser negativo e viceversa 
     +utente(IdUt,Nome,Idade,Morada)::nao(-utente(IdUt,Nome,Idade,Morada)).
     +(-utente(IdUt,Nome,Idade,Morada))::nao(utente(IdUt,Nome,Idade,Morada)).
-
-
-%% Remoção de Conhecimento
-
-    %% 
-    -(utente(IdUt,Nome,Idade,Morada))::(nao(interdito(Nome)),nao(interdito(Idade)),nao(interdito(Morada))).
-
+    
     %% Não se pode adicionar conhecimento negativo com nulos. 
     +(-utente(IdUt,Nome,Idade,Morada))::(nao(nulo(Nome))).
 
@@ -310,16 +315,28 @@ interdito(interdito).
     ilhas(acores).
     +utente(IdUt,Nome,Idade,Morada)::(nao(ilhas(Morada))).
 
+%% Remoção de Conhecimento
+
+    -(utente(IdUt,Nome,Idade,Morada))::(nao(interdito(Nome)),nao(interdito(Idade)),nao(interdito(Morada))).
+
+    
+
 
 % Prestador -----------------------------------------------------------------------
 
     %% Inserção de Conhecimento
-        %Isto torna os invariantes do interdito inutil
-        %+prestador(IdPrest, _, _, _) :: (findall(IdPrest, (prestador(IdPrest, _,_,_)), R), comprimento(R,1)).
+        %%Nao permite conhecimento repetido
+        +prestador(IdPrest,Nome,Especialidade,Instituicao) :: (
+            findall(
+                prestador(IdPrest,Nome,Especialidade,Instituicao),
+                prestador(IdPrest,Nome,Especialidade,Instituicao),
+                S),
+            comprimento(S,Num),Num<2
+            ).
         %
         +prestador(IdPrest,Nome,Especialidade,Instituicao) :: (nao(nulo(IdPrest)),integer(IdPrest)).
 
-        %% Conhecimento positivo não pode ser negativo. 
+        %% Conhecimento positivo não pode ser negativo e viceversa
         +prestador(IdPrest,Nome,Especialidade,Instituicao)::nao(-prestador(IdPrest,Nome,Especialidade,Instituicao)).
         +(-prestador(IdPrest,Nome,Especialidade,Instituicao))::nao(prestador(IdPrest,Nome,Especialidade,Instituicao)).
         %% Não se pode adicionar conhecimento negativo com nulos. 
@@ -327,6 +344,12 @@ interdito(interdito).
         +(-prestador(IdPrest,Nome,Especialidade,Instituicao))::(nao(nulo(Especialidade)),integer(Idade)).
         +(-prestador(IdPrest,Nome,Especialidade,Instituicao))::(nao(nulo(Instituicao))).
         
+        %% Não se pode adicionar conhecimento negativo com nulos. 
+        +(-prestador(IdPrest,Nome,Especialidade,Instituicao))::(nao(nulo(Nome))).
+        +(-prestador(IdPrest,Nome,Especialidade,Instituicao))::nao(nulo(Especialidade)).
+        +(-prestador(IdPrest,Nome,Especialidade,Instituicao))::nao(nulo(Instituicao)).
+
+    %% Remoção de Conhecimento
         %%TODO invariantes negativos
         -prestador(IdPrest,Nome,Especialidade,Instituicao)::(
                                                 nao(interdito(Nome)),
@@ -334,21 +357,15 @@ interdito(interdito).
                                                 nao(interdito(Instituicao))
                                                 ).
 
-
-    %% Remoção de Conhecimento
-    
-        % Não se pode remover conhecimento com algum atributo interdito.
-        -(prestador(IdPrest,Nome,Especialidade,Instituicao))::(nao(interdito(Nome)),nao(interdito(Especialidade)),nao(interdito(Instituicao))).
-
-        %% Não se pode adicionar conhecimento negativo com nulos. 
-        +(-prestador(IdPrest,Nome,Especialidade,Instituicao))::(nao(nulo(Nome))).
-        +(-prestador(IdPrest,Nome,Especialidade,Instituicao))::nao(nulo(Especialidade)).
-        +(-prestador(IdPrest,Nome,Especialidade,Instituicao))::nao(nulo(Instituicao)).
-
-
 % Cuidado -----------------------------------------------------------------------
-
-    %% Conhecimento positivo não pode ser negativo. 
+    +cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo) :: (
+            findall(
+                cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo),
+                cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo),
+                S),
+            comprimento(S,Num),Num<2
+            ).
+    %% Conhecimento positivo não pode ser negativo e viceversa
     +cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(-cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)).
     +(-cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)).
 
@@ -364,12 +381,17 @@ interdito(interdito).
 
     %% O custo de um cuidado tem de ser positivo
 
-    positivo(N):- integer(N), N>0.
-    positivo(incerto).
-    positivo(interdito).
     +cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::(positivo(Custo)).
 
-
+    %% Remoção de conhecimento
+    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(interdito(IdC)).
+    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(interdito(Dia)).
+    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(interdito(Mes)).
+    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(interdito(Ano)).
+    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(interdito(IdUt)).
+    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(interdito(IdPrest)).
+    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(interdito(Descricao)).
+    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(interdito(Custo)).
 
 %%--------------------------------------------------------------------------------------------------------------
 %% Lidar com a problemática da evolução do conhecimento, criando os procedimentos adequados;
@@ -406,7 +428,6 @@ interdito(interdito).
                 teste(Lista).
 
     involucao(T):- 
-                nao(isExcecao(T)),
                 findall(Invariante, -T :: Invariante, Lista),
                 remocao(T),
                 teste(Lista).
