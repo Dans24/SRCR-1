@@ -85,8 +85,9 @@ interdito(interdito).
     cuidado(1,20,18,6,2019,1,1,consultaOrtopedia,2000).
 
     %% Exemplos de Conhecimento Negativo
-        %% O prestador Carlos(2) nunca participou num cuidado com o utente Jorge(1) no ano 2018.
-    -cuidado(_,_,_,2018,1,2,_,_).
+        %% De forma a apresentar uma prova face a uma acusação feita por um utente, é sabido que 
+        %o prestador 2 não prestou cuidado ao utente 1, no dia 1 de janeiro de 2001 com um custo de 100 euros.
+    -cuidado(102,1,1,2001,1,2,””,100).
 
 
 
@@ -462,6 +463,10 @@ positivo(N):- integer(N), N>0.
     evolucao_utente_nome_incerto(Id,Idade,Morada):-
             insercao((excecao(utente(Id,Nome,Idade,Morada)):-utente(Id,incerto,Idade,Morada))),
             evolucao(utente(Id,incerto,Idade,Morada)).
+    
+    evolucao_prestador_especialidade_incerto(I,N,In):-
+            insercao((excecao(prestador(I,N,E,In)):-prestador(I,N,incerto,In))),
+            remocao(prestador(I,N,incerto,In)).
 
 %% Conhecimento Impreciso
 
@@ -495,9 +500,28 @@ positivo(N):- integer(N), N>0.
     evolucao_utente_nome_interdito(Id,Idade,Morada):-
             insercao((excecao(utente(Id,Nome,Idade,Morada)):-utente(Id,interdito,Idade,Morada))),
             insercao(
-                (+utente(I,Nome,A,M) :: (findall((I,Ns,A,M),(utente(Id,Ns,Idade,Morada), nao(interdito(Ns))),S ),comprimento( S,Num ), Num == 0))
+                (+utente(I,Nome,A,M)::(
+                    findall(
+                        (I,Ns,A,M),
+                        (utente(Id,Ns,Idade,Morada), nao(interdito(Ns))),
+                        S ),
+                    comprimento( S,Num ), Num == 0))
             ),
             evolucao(utente(Id,interdito,Idade,Morada)).
+
+    evolucao_prestador_especialidade_interdito(I,N,In):-
+            insercao((excecao(prestador(I,N,E,In)):-prestador(I,N,interdito,In))),
+            insercao(
+                +prestador(IdPrest,Nome,Especialidade,Instituicao)::(
+                    findall(
+                        (IdPrest,Nome,ES,Instituicao),
+                        (prestador(I,N,ES,In), nao(interdito(ES))),
+                        S 
+                    ),
+                    comprimento( S,Num ), Num == 0 )
+            ),
+            evolucao(prestador(I,N,interdito,In)
+    ).
 
 % Confirmar Conhecimento
     %% Confirma Imprecisos
@@ -538,6 +562,14 @@ positivo(N):- integer(N), N>0.
             evolucao(cuidado(Id,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)),
             remocao((excecao(cuidado(IdC,D,M,A,Iu,Ip,D,C)):-cuidado(IdC,D,M,A,Iu,Ip,D,incerto)),
             remocao(cuidado(Id,Dia,Mes,Ano,IdUt,IdPrest,Descricao,incerto)).
+            
+    confirmarPrestadorIncertoEspecialidade(Id,Especialidade):-
+            prestador(IdPrest,Nome,incerto,Instituicao),
+            evolucao(prestador(IdPrest,Nome,Especialidade,Instituicao)),
+            remocao((excecao(prestador(I,N,E,In)):-prestador(I,N,incerto,In))),
+            remocao(prestador(IdPrest,Nome,incerto,Instituicao)).
+    
+    
 %%--------------------------------------------------------------------------------------------------------------
 %% Desenvolver um sistema de inferência capaz de implementar os mecanismos de raciocínio inerentes a estes sistemas
 %%--------------------------------------------------------------------------------------------------------------
