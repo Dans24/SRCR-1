@@ -318,7 +318,7 @@ positivo(N):- integer(N), N>0.
 
     -(utente(IdUt,Nome,Idade,Morada))::(nao(interdito(Nome)),nao(interdito(Idade)),nao(interdito(Morada))).
     
-
+    -utente(IdUt,Nome,Idade,Morada)::(findall(IdC,(cuidado(IdC,_,_,_,IdUt,_,_,_)), S),comprimento(S,0)).
 
 % Prestador -----------------------------------------------------------------------
 
@@ -361,6 +361,8 @@ positivo(N):- integer(N), N>0.
                                                 nao(interdito(Especialidade)),
                                                 nao(interdito(Instituicao))
                                                 ).
+        
+        -prestador(IdPrest,Nome,Especialidade,Instituicao)::(findall(IdC,(cuidado(IdC,_,_,_,_,IdPrest,_,_)), S),comprimento(S,0)).
 
 % Cuidado -----------------------------------------------------------------------
     +cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo) :: (
@@ -522,6 +524,8 @@ positivo(N):- integer(N), N>0.
             ),
             evolucao(prestador(I,N,interdito,In)
     ).
+
+
 
 % Confirmar Conhecimento
     %% Confirma Imprecisos
