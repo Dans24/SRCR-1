@@ -556,6 +556,24 @@ positivo(N):- integer(N), N>0.
             evolucao(utente(Id,Nome,Idade,Morada)),
             remocao((excecao(utente(I,N,A,M)):-utente(I,N,incerto,M))),
             remocao(utente(Id,Nome,incerto,Morada)).
+
+    confirmarUtenteIncertoNome(Id,Nome):-
+            utente(Id,incerto,Idade,Morada),
+            evolucao(utente(Id,Nome,Idade,Morada)),
+            remocao((excecao(utente(I,N,A,M)):-utente(I,incerto,A,M))),
+            remocao(utente(Id,incerto,Idade,Morada)).
+
+    confirmarUtenteIncertoMorada(Id,Morada):-
+            utente(Id,Nome,Idade,incerto),
+            evolucao(utente(Id,Nome,Idade,Morada)),
+            remocao((excecao(utente(I,N,A,M)):-utente(I,N,A,incerto))),
+            remocao(utente(Id,incerto,Idade,Morada)).
+    
+    confirmarCuidadoIncertoCusto(Id,Custo):-
+            cuidado(Id,Dia,Mes,Ano,IdUt,IdPrest,Descricao,incerto),
+            evolucao(cuidado(Id,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)),
+            remocao((excecao(cuidado(IdC,D,M,A,Iu,Ip,D,C)):-cuidado(IdC,D,M,A,Iu,Ip,D,incerto))),
+            remocao(cuidado(Id,Dia,Mes,Ano,IdUt,IdPrest,Descricao,incerto)).
             
     confirmarPrestadorIncertoEspecialidade(Id,Especialidade):-
             prestador(IdPrest,Nome,incerto,Instituicao),
