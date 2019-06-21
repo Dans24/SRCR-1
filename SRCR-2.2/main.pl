@@ -85,8 +85,9 @@ interdito(interdito).
     cuidado(1,20,18,6,2019,1,1,consultaOrtopedia,2000).
 
     %% Exemplos de Conhecimento Negativo
-        %% O prestador Carlos(2) nunca participou num cuidado com o utente Jorge(1) no ano 2018.
-    -cuidado(_,_,_,2018,1,2,_,_).
+        %% De forma a apresentar uma prova face a uma acusação feita por um utente, é sabido que 
+        %o prestador 2 não prestou cuidado ao utente 1, no dia 1 de janeiro de 2001 com um custo de 100 euros.
+    -cuidado(102,1,1,2001,1,2,””,100).
 
 
 
@@ -380,7 +381,7 @@ positivo(N):- integer(N), N>0.
     % Um prestador não pode ter mais do que 8 cuidados por dia 
     +cuidado(IdC, Dia, Mes, Ano, IdUt, IdPrest, Descricao, Custo) :: (
                                                                 findall(Dia, cuidado(_,Dia,Mes,Ano, _,IdPrest,_,_), L1),
-                                                                comprimento(L1, S), S=<3
+                                                                comprimento(L1, S), S=<8
     ).
     
     %% Conhecimento positivo não pode ser negativo e viceversa
@@ -495,8 +496,6 @@ positivo(N):- integer(N), N>0.
         evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,impreciso([]),IdPrest,Descricao,Custo).
         evolucaoCuidadoImprecisos(IdCDia,Mes,Ano,IdUt,IdPrest,Descricao,Custo):- evolucaoExcecao(cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)).
 
-    
-
     %% Conhecimento Interdito
     evolucao_utente_nome_interdito(Id,Idade,Morada):-
             insercao((excecao(utente(Id,Nome,Idade,Morada)):-utente(Id,interdito,Idade,Morada))),
@@ -570,6 +569,12 @@ positivo(N):- integer(N), N>0.
             remocao((excecao(utente(I,N,A,M)):-utente(I,N,A,incerto))),
             remocao(utente(Id,incerto,Idade,Morada)).
     
+    confirmarCuidadoIncertoCusto(Id,Custo):-
+            cuidado(Id,Dia,Mes,Ano,IdUt,IdPrest,Descricao,incerto),
+            evolucao(cuidado(Id,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)),
+            remocao((excecao(cuidado(IdC,D,M,A,Iu,Ip,D,C)):-cuidado(IdC,D,M,A,Iu,Ip,D,incerto)),
+            remocao(cuidado(Id,Dia,Mes,Ano,IdUt,IdPrest,Descricao,incerto)).
+            
     confirmarPrestadorIncertoEspecialidade(Id,Especialidade):-
             prestador(IdPrest,Nome,incerto,Instituicao),
             evolucao(prestador(IdPrest,Nome,Especialidade,Instituicao)),
