@@ -150,16 +150,6 @@ interdito(interdito).
                         comprimento( S,N ), N == 0 
                     ).
 
-    /** Acho que até faz bastante sentido
-    +(-utente(IdUt,Nome,Idade,Morada)) :: (
-                        findall(
-                            (IdUt,Nome,Idade,MS),
-                            (-utente(6,gustavo,Idade,MS), nao(interdito(MS))),
-                            S ),
-                        comprimento( S,N ), N == 0 
-                    ).
-    */
-
 
 % Prestador -----------------------------------------------------------------------
 
@@ -317,8 +307,7 @@ positivo(N):- integer(N), N>0.
 
 %% Remoção de Conhecimento
 
-    -(utente(IdUt,Nome,Idade,Morada))::(nao(interdito(Nome)),nao(interdito(Idade)),nao(interdito(Morada))).
-
+    -(utente(IdUt,Nome,Idade,Morada))::(nao(nulo(Nome)),nao(nulo(Idade)),nao(nulo(Morada))).
     
 
 
@@ -352,9 +341,9 @@ positivo(N):- integer(N), N>0.
     %% Remoção de Conhecimento
         %%TODO invariantes negativos
         -prestador(IdPrest,Nome,Especialidade,Instituicao)::(
-                                                nao(interdito(Nome)),
-                                                nao(interdito(Especialidade)),
-                                                nao(interdito(Instituicao))
+                                                nao(nulo(Nome)),
+                                                nao(nulo(Especialidade)),
+                                                nao(nulo(Instituicao))
                                                 ).
 
 % Cuidado -----------------------------------------------------------------------
@@ -384,14 +373,14 @@ positivo(N):- integer(N), N>0.
     +cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::(positivo(Custo)).
 
     %% Remoção de conhecimento
-    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(interdito(IdC)).
-    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(interdito(Dia)).
-    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(interdito(Mes)).
-    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(interdito(Ano)).
-    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(interdito(IdUt)).
-    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(interdito(IdPrest)).
-    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(interdito(Descricao)).
-    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(interdito(Custo)).
+    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(nulo(IdC)).
+    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(nulo(Dia)).
+    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(nulo(Mes)).
+    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(nulo(Ano)).
+    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(nulo(IdUt)).
+    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(nulo(IdPrest)).
+    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(nulo(Descricao)).
+    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(nulo(Custo)).
 
 %%--------------------------------------------------------------------------------------------------------------
 %% Lidar com a problemática da evolução do conhecimento, criando os procedimentos adequados;
@@ -450,9 +439,6 @@ positivo(N):- integer(N), N>0.
         evolucaoUtentesImprecisos(Id,impreciso([]),I,M).
         evolucaoUtentesImprecisos(Id,N,I,M):- evolucaoExcecao(utente(Id,N,I,M)).
 
-        %remocaoUtentesImprecisos(Id):- findall(excecao(utentes(Id,N,I,M)),excecao(utentes(Id,N,I,M)),S), involucaoAll(S).
-
-
     % Prestador -----------------------------------------------------------------------
 
         %% Exemplo de predicado que adiciona várias exceções de prestadores
@@ -471,9 +457,22 @@ positivo(N):- integer(N), N>0.
         evolucaoCuidadoImprecisos(IdC,Dia,Mes,Ano,impreciso([]),IdPrest,Descricao,Custo).
         evolucaoCuidadoImprecisos(IdCDia,Mes,Ano,IdUt,IdPrest,Descricao,Custo):- evolucaoExcecao(cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)).
 
-    %TODO meter evolucao de conhecimento incerto/impreciso intervalos e interdito? 
+    %% prestador(IdPrest,Nome,Especialidade,Instituicao)
+        removePrestadorImpreciso(IdPrest):-
+            findall(excecao(prestador(IdPrest,N,E,I)),excecao(prestador(IdPrest,N,E,I)),S),
+            removeTodos(S).
+        evolucaoPrestadorImpreciso(IdPrest,Nome,Especialidade,Instituicao):-
+                removePrestadorImpreciso(Id),
+                evolucao(prestador(IdPrest,Nome,Especialidade,Instituicao)).
+        % cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)
+        removeCuidadoImpreciso(IdC):-
+            findall(excecao(cuidado(IdC,D,M,A,Ut,Prest,Desc,C)),excecao(cuidado(IdC,D,M,A,Ut,Prest,Desc,C)),S),
+            removeTodos(S).
+        evolucaoCuidadoImpreciso(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo):-
+                removeUtenteImpreciso(IdC),
+                evolucao(utente(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)).
 
-%% Conhecimento Incerto
+    %% Conhecimento Incerto
 
     evolucaoUtenteIncertoIdade(Id,Idade):-
 
@@ -487,46 +486,20 @@ positivo(N):- integer(N), N>0.
             removeTodos(S),
             evolucao(utente(Id,Nome,Idade,Morada)).
     
-    excecao(utente(34,marco,24,lisboa)).
-    excecao(utente(34,marco,25,lisboa)).
     
-    removeSeNomeIncerto(Id) :- 
-        findall(
-            utente(Id,incerto,A,N),
-            utente(Id,incerto,A,N),
-            S
-        ),
-        removeHead(S).
-    removeSeIdadeIncerto(Id) :- 
-        findall(
-            utente(Id,N,incerto,M),
-            utente(Id,N,incerto,M),
-            S
-        ),
-        removeHead(S).
-    removeSeMoradaIncerto(Id) :- 
-        findall(
-            utente(Id,N,A,incerto),
-            utente(Id,N,A,incerto),
-            S
-        ),
-        removeHead(S).
+    %%Confirma Imprecisos
+        
 
-    %% prestador(IdPrest,Nome,Especialidade,Instituicao)
-    removePrestadorDesconhecido(IdPrest):-
-        findall(excecao(prestador(IdPrest,N,E,I)),excecao(prestador(IdPrest,N,E,I)),S),
-        removeTodos(S).
-    evolucaoPrestadorDesconhecido(IdPrest,Nome,Especialidade,Instituicao):-
-            removePrestadorDesconhecido(Id),
-            evolucao(prestador(IdPrest,Nome,Especialidade,Instituicao)).
-    % cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)
-    removeCuidadoDesconhecido(IdC):-
-        findall(excecao(cuidado(IdC,D,M,A,Ut,Prest,Desc,C)),excecao(cuidado(IdC,D,M,A,Ut,Prest,Desc,C)),S),
-        removeTodos(S).
-    evolucaoCuidadoDesconhecido(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo):-
-            removeUtenteDesconhecido(IdC),
-            evolucao(utente(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)).
-
+    %% Conhecimento Interdito
+        evolucao_utente_nome_interdito(Id,Idade,Morada):-
+                insercao((excecao(utente(Id,Nome,Idade,Morada)):-utente(Id,interdito,Idade,Morada))),
+                insercao(
+                    (+utente(I,Nome,A,M) :: (findall((I,Ns,A,M),(utente(Id,Ns,Idade,Morada), nao(interdito(Ns))),S ),comprimento( S,Num ), Num == 0))
+                ),
+                evolucao(utente(Id,interdito,Idade,Morada)).
+        %%
+        involucao_utente_nome_interdito(Id,Idade,Morada):-
+                involucao(utente(Id,interdito,Idade,Morada)).
 %%--------------------------------------------------------------------------------------------------------------
 %% Desenvolver um sistema de inferência capaz de implementar os mecanismos de raciocínio inerentes a estes sistemas
 %%--------------------------------------------------------------------------------------------------------------
