@@ -376,6 +376,13 @@ positivo(N):- integer(N), N>0.
                 S),
             comprimento(S,Num),Num<2
             ).
+
+    % Um prestador não pode ter mais do que 8 cuidados por dia 
+    +cuidado(IdC, Dia, Mes, Ano, IdUt, IdPrest, Descricao, Custo) :: (
+                                                                findall(Dia, cuidado(_,Dia,Mes,Ano, _,IdPrest,_,_), L1),
+                                                                comprimento(L1, S), S=<3
+    ).
+    
     %% Conhecimento positivo não pode ser negativo e viceversa
     +cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(-cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)).
     +(-cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo))::nao(cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)).
@@ -455,6 +462,10 @@ positivo(N):- integer(N), N>0.
     evolucao_utente_nome_incerto(Id,Idade,Morada):-
             insercao((excecao(utente(Id,Nome,Idade,Morada)):-utente(Id,incerto,Idade,Morada))),
             evolucao(utente(Id,incerto,Idade,Morada)).
+    
+    evolucao_prestador_especialidade_incerto(I,N,In):-
+            insercao((excecao(prestador(I,N,E,In)):-prestador(I,N,incerto,In))),
+            remocao(prestador(I,N,incerto,In)).
 
 %% Conhecimento Impreciso
 
@@ -490,9 +501,28 @@ positivo(N):- integer(N), N>0.
     evolucao_utente_nome_interdito(Id,Idade,Morada):-
             insercao((excecao(utente(Id,Nome,Idade,Morada)):-utente(Id,interdito,Idade,Morada))),
             insercao(
-                (+utente(I,Nome,A,M) :: (findall((I,Ns,A,M),(utente(Id,Ns,Idade,Morada), nao(interdito(Ns))),S ),comprimento( S,Num ), Num == 0))
+                (+utente(I,Nome,A,M)::(
+                    findall(
+                        (I,Ns,A,M),
+                        (utente(Id,Ns,Idade,Morada), nao(interdito(Ns))),
+                        S ),
+                    comprimento( S,Num ), Num == 0))
             ),
             evolucao(utente(Id,interdito,Idade,Morada)).
+
+    evolucao_prestador_especialidade_interdito(I,N,In):-
+            insercao((excecao(prestador(I,N,E,In)):-prestador(I,N,interdito,In))),
+            insercao(
+                +prestador(IdPrest,Nome,Especialidade,Instituicao)::(
+                    findall(
+                        (IdPrest,Nome,ES,Instituicao),
+                        (prestador(I,N,ES,In), nao(interdito(ES))),
+                        S 
+                    ),
+                    comprimento( S,Num ), Num == 0 )
+            ),
+            evolucao(prestador(I,N,interdito,In)
+    ).
 
 % Confirmar Conhecimento
     %% Confirma Imprecisos
@@ -540,6 +570,13 @@ positivo(N):- integer(N), N>0.
             remocao((excecao(utente(I,N,A,M)):-utente(I,N,A,incerto))),
             remocao(utente(Id,incerto,Idade,Morada)).
     
+    confirmarPrestadorIncertoEspecialidade(Id,Especialidade):-
+            prestador(IdPrest,Nome,incerto,Instituicao),
+            evolucao(prestador(IdPrest,Nome,Especialidade,Instituicao)),
+            remocao((excecao(prestador(I,N,E,In)):-prestador(I,N,incerto,In))),
+            remocao(prestador(IdPrest,Nome,incerto,Instituicao)).
+    
+    
 %%--------------------------------------------------------------------------------------------------------------
 %% Desenvolver um sistema de inferência capaz de implementar os mecanismos de raciocínio inerentes a estes sistemas
 %%--------------------------------------------------------------------------------------------------------------
@@ -567,4 +604,4 @@ positivo(N):- integer(N), N>0.
     siDisj([X|T],verdadeiro):- siDisj(T,verdadeiro), -X.
     siDisj([X|T],verdadeiro):- siDisj(T,verdadeiro), nao(X), nao(-X).
     siDisj([X|T],verdadeiro):- siDisj(T,desconhecido), X.
-    siDisj([X|T],verdadeiro):- siDisj(T,falso), X.
+siDisj([X|T],verdadeiro):- siDisj(T,falso), X.
