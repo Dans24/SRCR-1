@@ -554,8 +554,20 @@ positivo(N):- integer(N), N>0.
     confirmarUtenteIncertoIdade(Id,Idade):-
             utente(Id,Nome,incerto,Morada),
             evolucao(utente(Id,Nome,Idade,Morada)),
-            remocao((excecao(utente(I,N,A,M)):-utente(I,incerto,A,M))),
+            remocao((excecao(utente(I,N,A,M)):-utente(I,N,incerto,M))),
             remocao(utente(Id,Nome,incerto,Morada)).
+
+    confirmarUtenteIncertoNome(Id,Nome):-
+            utente(Id,incerto,Idade,Morada),
+            evolucao(utente(Id,Nome,Idade,Morada)),
+            remocao((excecao(utente(I,N,A,M)):-utente(I,incerto,A,M))),
+            remocao(utente(Id,incerto,Idade,Morada)).
+
+    confirmarUtenteIncertoMorada(Id,Morada):-
+            utente(Id,Nome,Idade,incerto),
+            evolucao(utente(Id,Nome,Idade,Morada)),
+            remocao((excecao(utente(I,N,A,M)):-utente(I,N,A,incerto))),
+            remocao(utente(Id,incerto,Idade,Morada)).
     
     confirmarCuidadoIncertoCusto(Id,Custo):-
             cuidado(Id,Dia,Mes,Ano,IdUt,IdPrest,Descricao,incerto),
