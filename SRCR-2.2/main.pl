@@ -307,7 +307,7 @@ positivo(N):- integer(N), N>0.
 
 %% Remoção de Conhecimento
 
-    -(utente(IdUt,Nome,Idade,Morada))::(nao(nulo(Nome)),nao(nulo(Idade)),nao(nulo(Morada))).
+    -(utente(IdUt,Nome,Idade,Morada))::(nao(interdito(Nome)),nao(interdito(Idade)),nao(interdito(Morada))).
     
 
 
@@ -341,9 +341,9 @@ positivo(N):- integer(N), N>0.
     %% Remoção de Conhecimento
         %%TODO invariantes negativos
         -prestador(IdPrest,Nome,Especialidade,Instituicao)::(
-                                                nao(nulo(Nome)),
-                                                nao(nulo(Especialidade)),
-                                                nao(nulo(Instituicao))
+                                                nao(interdito(Nome)),
+                                                nao(interdito(Especialidade)),
+                                                nao(interdito(Instituicao))
                                                 ).
 
 % Cuidado -----------------------------------------------------------------------
@@ -373,14 +373,14 @@ positivo(N):- integer(N), N>0.
     +cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::(positivo(Custo)).
 
     %% Remoção de conhecimento
-    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(nulo(IdC)).
-    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(nulo(Dia)).
-    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(nulo(Mes)).
-    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(nulo(Ano)).
-    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(nulo(IdUt)).
-    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(nulo(IdPrest)).
-    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(nulo(Descricao)).
-    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(nulo(Custo)).
+    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(interdito(IdC)).
+    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(interdito(Dia)).
+    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(interdito(Mes)).
+    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(interdito(Ano)).
+    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(interdito(IdUt)).
+    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(interdito(IdPrest)).
+    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(interdito(Descricao)).
+    -cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)::nao(interdito(Custo)).
 
 %%--------------------------------------------------------------------------------------------------------------
 %% Lidar com a problemática da evolução do conhecimento, criando os procedimentos adequados;
@@ -428,6 +428,14 @@ positivo(N):- integer(N), N>0.
     contem(X,[X|T]).
     contem(X,[H|T]) :- contem(X,T).
 
+%% Conhecimento Incerto
+    evolucao_utente_nome_incerto(Id,Idade,Morada):-
+            insercao((excecao(utente(Id,Nome,Idade,Morada)):-utente(Id,incerto,Idade,Morada))),
+            evolucao(utente(Id,incerto,Idade,Morada)).
+
+    involucao_utente_nome_incerto(Id,Idade,Morada):-
+        remocao((excecao(utente(Id,Nome,Idade,Morada)):-utente(Id,incerto,Idade,Morada))),
+        involucao(utente(Id,incerto,Idade,Morada)).
 %% Conhecimento Impreciso
 
     % Utente -----------------------------------------------------------------------
@@ -462,6 +470,7 @@ positivo(N):- integer(N), N>0.
             findall(excecao(prestador(IdPrest,N,E,I)),excecao(prestador(IdPrest,N,E,I)),S),
             removeTodos(S).
         evolucaoPrestadorImpreciso(IdPrest,Nome,Especialidade,Instituicao):-
+                excecao(prestador(IdPrest,Nome,Especialidade,Instituicao)), %%Verifica se existe alguma exceção em que ele se encaixe
                 removePrestadorImpreciso(Id),
                 evolucao(prestador(IdPrest,Nome,Especialidade,Instituicao)).
         % cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)
@@ -469,6 +478,7 @@ positivo(N):- integer(N), N>0.
             findall(excecao(cuidado(IdC,D,M,A,Ut,Prest,Desc,C)),excecao(cuidado(IdC,D,M,A,Ut,Prest,Desc,C)),S),
             removeTodos(S).
         evolucaoCuidadoImpreciso(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo):-
+                excecao(cuidado(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)), %%Verifica se existe alguma exceção em que ele se encaixe
                 removeUtenteImpreciso(IdC),
                 evolucao(utente(IdC,Dia,Mes,Ano,IdUt,IdPrest,Descricao,Custo)).
 
