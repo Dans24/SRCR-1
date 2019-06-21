@@ -501,7 +501,9 @@ positivo(N):- integer(N), N>0.
    
     %% Conhecimento Incerto
 
-    evolucaoUtenteIncertoIdade(Id,Idade):-
+    confirmarUtenteIncertoIdade(Id,Idade):-
+            utente(Id,Nome,incerto,Morada),
+            remocao((excecao(utente(I,N,A,M)):-utente(I,interdito,A,M))),
             remocao(utente(Id,Nome,incerto,Morada)),
             evolucao(utente(Id,Nome,Idade,Morada)).
     
